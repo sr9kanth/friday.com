@@ -474,6 +474,9 @@
             .grp-label:hover .grp-del {
                 opacity: 1 !important;
             }
+            .tour-hl {
+                box-shadow: 0 0 0 3px var(--acc), 0 0 0 9999px rgba(0,0,0,0.55) !important;
+            }
 
             /* Cell chips */
             .chip {
@@ -982,9 +985,9 @@
     <body class="force-dark">
         <div class="topbar">
             <span class="board-title">Friday.com</span>
-            <div class="tb-sep"></div>
+            <div class="tb-sep" id="syncSep" style="display:none"></div>
             <span id="syncStatus" style="font-size:11px;white-space:nowrap;color:var(--tx3);display:none"></span>
-            <span id="syncLastUpdated" style="font-size:10px;white-space:nowrap;color:var(--tx3);display:none"></span>
+            <span id="syncLastUpdated" style="font-size:10px;white-space:nowrap;color:var(--tx3);display:none;margin-left:6px"></span>
             <div class="tb-sep"></div>
             <button class="tb-btn" onclick="exportHtml()">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1051,7 +1054,6 @@
             </button>
             <span id="saveStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3)">Saving…</span>
             <div class="spacer"></div>
-            <span id="appVersion" style="font-size:10px;color:var(--tx3);white-space:nowrap;font-weight:400"></span>
             <button class="tb-btn pri" onclick="openAddGroup()">
                 + New group
             </button>
@@ -6148,20 +6150,24 @@
                 shareUpdatedAt = fmtSyncTime();
                 localStorage.setItem('fridayShareUpdatedAt', shareUpdatedAt);
                 const el = document.getElementById('syncLastUpdated');
-                if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = ''; }
+                if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = 'inline'; }
+                const sep = document.getElementById('syncSep');
+                if (sep) sep.style.display = 'block';
                 const modal = document.getElementById('shareLastSynced');
                 if (modal) modal.textContent = 'Last synced: ' + shareUpdatedAt;
             }
             // Restore topbar timestamp on load
             (function(){ if (shareCode && shareUpdatedAt) {
                 const el = document.getElementById('syncLastUpdated');
-                if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = ''; }
+                if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = 'inline'; }
+                const sep = document.getElementById('syncSep');
+                if (sep) sep.style.display = 'block';
             }})();
 
             function setSyncStatus(msg, color) {
                 const el = document.getElementById('syncStatus');
                 if (!el) return;
-                if (msg) { el.textContent = msg; el.style.color = color || 'var(--tx3)'; el.style.display = ''; }
+                if (msg) { el.textContent = msg; el.style.color = color || 'var(--tx3)'; el.style.display = 'inline'; }
                 else { el.style.display = 'none'; }
             }
             function startSharePolling() {
@@ -6257,7 +6263,102 @@
 
             buildFilters();
             renderView();
+
+            // ── TOUR ──
+            const TOUR_STEPS = [
+                { title: '👋 Welcome to Friday.com', desc: 'A lightweight project board for your team. This quick tour covers the key features — takes about 30 seconds.' },
+                { title: '📋 Main table & Gantt', desc: 'Switch views using the tabs in the toolbar. Main table shows all tasks in groups; Gantt shows a timeline bar chart.', el: 'vtMain' },
+                { title: '🔍 Search & Filter', desc: 'Type in the search box to filter tasks by name. Use the dropdowns to filter by group, status, or owner.', el: 'searchInp' },
+                { title: '✅ Tasks', desc: 'Click any task row to open the side panel — edit details, set dates, assign owners, change status, and leave comments.', el: null },
+                { title: '➕ Adding tasks & groups', desc: 'Use "+ Add task" inside any group to add a task. Use "+ New group" in the top-right to create a new group.', el: 'openAddGroup' },
+                { title: '🔗 Share & live sync', desc: 'Click Share to generate a 6-char code. Send it to teammates — they join via the Join tab. Changes sync automatically every 15 seconds.', el: 'shareBtn' },
+                { title: '💾 Boards & backups', desc: 'Save named snapshots via the Boards button. Export HTML or Backup JSON for offline copies.', el: null },
+            ];
+            let _tourStep = 0;
+
+            function startTour() {
+                _tourStep = 0;
+                document.getElementById('tourOverlay').style.display = 'block';
+                renderTourStep();
+            }
+            function skipTour() {
+                document.getElementById('tourOverlay').style.display = 'none';
+                document.getElementById('tourBox').style.display = 'none';
+                clearTourHighlight();
+                localStorage.setItem('fridayTourDone', '1');
+            }
+            function nextTourStep() {
+                _tourStep++;
+                if (_tourStep >= TOUR_STEPS.length) { skipTour(); return; }
+                renderTourStep();
+            }
+            function prevTourStep() {
+                if (_tourStep > 0) { _tourStep--; renderTourStep(); }
+            }
+            function clearTourHighlight() {
+                document.querySelectorAll('.tour-hl').forEach(el => {
+                    el.classList.remove('tour-hl');
+                    el.style.position = '';
+                    el.style.zIndex = '';
+                    el.style.borderRadius = '';
+                });
+            }
+            function renderTourStep() {
+                const step = TOUR_STEPS[_tourStep];
+                const box = document.getElementById('tourBox');
+                const overlay = document.getElementById('tourOverlay');
+                clearTourHighlight();
+                document.getElementById('tourTitle').textContent = step.title;
+                document.getElementById('tourDesc').textContent = step.desc;
+                document.getElementById('tourStepNum').textContent = (_tourStep + 1) + ' of ' + TOUR_STEPS.length;
+                document.getElementById('tourPrev').style.display = _tourStep > 0 ? '' : 'none';
+                document.getElementById('tourNext').textContent = _tourStep === TOUR_STEPS.length - 1 ? 'Done' : 'Next →';
+                box.style.display = 'block';
+
+                const target = step.el ? document.getElementById(step.el) || document.querySelector('[onclick*="' + step.el + '"]') : null;
+                if (target) {
+                    target.classList.add('tour-hl');
+                    target.style.position = 'relative';
+                    target.style.zIndex = '901';
+                    target.style.borderRadius = '6px';
+                    const rect = target.getBoundingClientRect();
+                    const bw = 300, bh = 160;
+                    let top = rect.bottom + 10;
+                    let left = rect.left;
+                    if (top + bh > window.innerHeight) top = rect.top - bh - 10;
+                    if (left + bw > window.innerWidth) left = window.innerWidth - bw - 16;
+                    if (left < 8) left = 8;
+                    box.style.top = top + 'px';
+                    box.style.left = left + 'px';
+                    box.style.transform = 'none';
+                } else {
+                    box.style.top = '50%';
+                    box.style.left = '50%';
+                    box.style.transform = 'translate(-50%, -50%)';
+                }
+            }
+            if (!localStorage.getItem('fridayTourDone')) {
+                document.addEventListener('DOMContentLoaded', () => setTimeout(startTour, 600));
+            }
         </script>
+
+        <!-- Tour overlay & box -->
+        <div id="tourOverlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.55);pointer-events:all" onclick="skipTour()"></div>
+        <div id="tourBox" style="display:none;position:fixed;z-index:902;background:var(--bg);border:1px solid var(--bd2);border-radius:10px;padding:20px;width:300px;box-shadow:0 8px 40px rgba(0,0,0,.35);pointer-events:all">
+            <div id="tourTitle" style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:8px"></div>
+            <div id="tourDesc" style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+                <span id="tourStepNum" style="font-size:11px;color:var(--tx3)"></span>
+                <div style="display:flex;gap:8px">
+                    <button id="tourPrev" onclick="prevTourStep()" style="display:none;padding:0 12px;height:30px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:var(--tx2);font-size:12px;cursor:pointer">← Back</button>
+                    <button onclick="skipTour()" style="padding:0 12px;height:30px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:var(--tx3);font-size:12px;cursor:pointer">Skip</button>
+                    <button id="tourNext" onclick="nextTourStep()" style="padding:0 14px;height:30px;border:none;border-radius:6px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;cursor:pointer">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Version stamp (bottom-right) -->
+        <div id="appVersion" style="position:fixed;bottom:8px;right:12px;font-size:10px;color:var(--tx3);pointer-events:none;z-index:10;user-select:none"></div>
 
         <plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.37783462112409071775736152470"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.72518089277379131775737001381"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.99506582531271651775737613615"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.43656394689935231775738039254"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui>
     
