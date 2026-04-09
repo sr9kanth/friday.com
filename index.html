@@ -7851,28 +7851,32 @@
                     return;
                 }
                 setShareStatus("Generating…");
-                const code = randCode();
-                const data = boardSnapshot();
-                const { error } = await sb
-                    .from("boards")
-                    .insert({
-                        code,
-                        data,
-                        updated_at: new Date().toISOString(),
-                    });
-                if (error) {
-                    setShareStatus("Error: " + error.message, "#e2445c");
-                    return;
+                try {
+                    const code = randCode();
+                    const data = boardSnapshot();
+                    const { error } = await sb
+                        .from("boards")
+                        .insert({
+                            code,
+                            data,
+                            updated_at: new Date().toISOString(),
+                        });
+                    if (error) {
+                        setShareStatus("Error: " + error.message, "#e2445c");
+                        return;
+                    }
+                    shareCode = code;
+                    shareUpdatedAt = new Date().toLocaleString();
+                    localStorage.setItem("fridayShareCode", shareCode);
+                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    renderShareModal();
+                    setShareStatus(
+                        "Board shared! Send the code above to your collaborators.",
+                        "#00c875",
+                    );
+                } catch(e) {
+                    setShareStatus("Error: " + e.message, "#e2445c");
                 }
-                shareCode = code;
-                shareUpdatedAt = new Date().toLocaleString();
-                localStorage.setItem("fridayShareCode", shareCode);
-                localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
-                renderShareModal();
-                setShareStatus(
-                    "Board shared! Send the code above to your collaborators.",
-                    "#00c875",
-                );
             }
 
             async function pushSharedBoard() {
@@ -7883,19 +7887,23 @@
                     return;
                 }
                 setShareStatus("Pushing update…");
-                const data = boardSnapshot();
-                const ts = new Date().toISOString();
-                const { error } = await sb
-                    .from("boards")
-                    .upsert({ code: shareCode, data, updated_at: ts });
-                if (error) {
-                    setShareStatus("Error: " + error.message, "#e2445c");
-                    return;
+                try {
+                    const data = boardSnapshot();
+                    const ts = new Date().toISOString();
+                    const { error } = await sb
+                        .from("boards")
+                        .upsert({ code: shareCode, data, updated_at: ts });
+                    if (error) {
+                        setShareStatus("Error: " + error.message, "#e2445c");
+                        return;
+                    }
+                    shareUpdatedAt = new Date().toLocaleString();
+                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    renderShareModal();
+                    setShareStatus("Board updated successfully.", "#00c875");
+                } catch(e) {
+                    setShareStatus("Error: " + e.message, "#e2445c");
                 }
-                shareUpdatedAt = new Date().toLocaleString();
-                localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
-                renderShareModal();
-                setShareStatus("Board updated successfully.", "#00c875");
             }
 
             function stopSharing() {
@@ -7928,24 +7936,28 @@
                     return;
                 }
                 setJoinStatus("Loading board…");
-                const { data, error } = await sb
-                    .from("boards")
-                    .select("data")
-                    .eq("code", code)
-                    .single();
-                if (error || !data) {
-                    setJoinStatus(
-                        "Board not found. Check the code and try again.",
-                        "#e2445c",
-                    );
-                    return;
+                try {
+                    const { data, error } = await sb
+                        .from("boards")
+                        .select("data")
+                        .eq("code", code)
+                        .single();
+                    if (error || !data) {
+                        setJoinStatus(
+                            "Board not found. Check the code and try again.",
+                            "#e2445c",
+                        );
+                        return;
+                    }
+                    loadBoardSnapshot(data.data);
+                    shareCode = code;
+                    shareUpdatedAt = new Date().toLocaleString();
+                    localStorage.setItem("fridayShareCode", shareCode);
+                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    closeShareModal();
+                } catch(e) {
+                    setJoinStatus("Error: " + e.message, "#e2445c");
                 }
-                loadBoardSnapshot(data.data);
-                shareCode = code;
-                shareUpdatedAt = new Date().toLocaleString();
-                localStorage.setItem("fridayShareCode", shareCode);
-                localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
-                closeShareModal();
             }
 
             function copyShareCode() {
