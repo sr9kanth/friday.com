@@ -255,7 +255,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
     <select class="flt" id="statusFil" onchange="renderView()"><option value="all">All statuses</option><option value="Done">Done</option><option value="In progress">In progress</option><option value="">No status</option></select>
     <select class="flt" id="leadFil" onchange="renderView()"><option value="all">All owners</option><option value="ACER">ACER</option><option value="CF">CF</option><option value="HC">HC</option><option value="MF">MF</option><option value="MS">MS</option><option value="NR">NR</option><option value="Ot">Ot</option><option value="PM">PM</option><option value="TF">TF</option></select>
   </div>
-  <button class="add-main" onclick="openAddGroup()">+ Add task</button>
+  <button class="add-main" onclick="openAddTask()">+ Add task</button>
 </div>
 
 <div id="mainView" class="grid-wrap">
@@ -1145,6 +1145,7 @@ function renderMain(){
 function renderGantt(){
   const tasks=filteredTasks();
   const groups={};
+  Object.keys(STREAMS).forEach(s=>{groups[s]=[];});
   tasks.forEach(t=>{if(!groups[t.st])groups[t.st]=[];groups[t.st].push(t);});
   const totalD=Math.ceil((MAX_D-MIN_D)/86400000);
   const tw=totalD*PPD;
@@ -1273,6 +1274,19 @@ function addTask(stream){
     saveLiveState();
     renderView();
   });
+}
+function openAddTask(){
+  const keys=Object.keys(STREAMS);
+  if(!keys.length){
+    showInputModal('Create a group first','Group name…',nm=>{
+      const cols=['#7b5ea7','#00c875','#579bfc','#fdab3d','#e2445c','#ff642e'];
+      STREAMS[nm]=cols[0];
+      saveLiveState();
+      buildFilters();renderView();
+    });
+  } else {
+    addTask(keys[0]);
+  }
 }
 function openAddGroup(){
   showInputModal('New group', 'Group name…', nm=>{
