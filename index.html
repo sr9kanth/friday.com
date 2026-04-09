@@ -630,11 +630,6 @@ const LIVE_KEY='fridayBoardState';
   }catch(e){}
 })();
 // Derive KNOWN_OWNERS from tasks actually on this board (clears stale cross-board accumulation)
-(function(){
-  const used=[...new Set(TASKS.flatMap(t=>t.ld||[]))];
-  KNOWN_OWNERS.length=0;
-  KNOWN_OWNERS.push(...used);
-})();
 function saveLiveState(){
   try{localStorage.setItem(LIVE_KEY,JSON.stringify({TASKS:JSON.parse(JSON.stringify(TASKS)),STREAMS:JSON.parse(JSON.stringify(STREAMS)),nextId,AV_COLORS:{...AV_COLORS}}));}catch(e){}
 }
@@ -643,6 +638,8 @@ TASKS.forEach(t=>{if(!t.comments)t.comments=[];});
 let panelTaskId=null;
 let dragTaskId=null;
 const KNOWN_OWNERS=["AL","JM","SR","TF","MS","PM","CC","SM"];
+// Derive from current board tasks — clears any stale cross-board owners
+(function(){const used=[...new Set(TASKS.flatMap(t=>t.ld||[]))];KNOWN_OWNERS.length=0;KNOWN_OWNERS.push(...used);})();
 
 const MIN_D=new Date('2026-03-01'),MAX_D=new Date('2026-12-31'),TODAY=new Date('2026-04-09');
 const PPD=3.5;
