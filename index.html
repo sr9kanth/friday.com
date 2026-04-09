@@ -205,7 +205,16 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
   </button>
   <button class="tb-btn" onclick="exportHtml()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h10M8 3v7M5 7l3 3 3-3"/></svg>
-    Export
+    Export HTML
+  </button>
+  <button class="tb-btn" onclick="exportJson()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6M9 2l4 4M9 2v4h4"/><path d="M6 9h1m2 0h1"/></svg>
+    Backup JSON
+  </button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="openResetModal()" style="color:#e2445c" title="Delete all data and start over">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2 4 4 4 14 4"/><path d="M5 4V2h6v2M6 7v5M10 7v5"/><path d="M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"/></svg>
+    Reset
   </button>
   <div class="tb-sep"></div>
   <button class="tb-btn" onclick="saveToGithub()" id="saveBtn">
@@ -300,6 +309,19 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
         <button onclick="closeGhModal()" style="padding:0 14px;height:32px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:13px;cursor:pointer">Cancel</button>
         <button onclick="saveGhSettings()" style="padding:0 16px;height:32px;border:none;border-radius:var(--r);background:var(--acc);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Save &amp; Push</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset confirmation modal -->
+<div id="resetModal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.45);align-items:center;justify-content:center">
+  <div style="background:var(--bg);border-radius:var(--r);padding:24px;width:360px;max-width:92vw;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="font-size:15px;font-weight:700;color:#e2445c;margin-bottom:8px">Reset board?</div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:20px">This will permanently delete <strong>all tasks, groups, and comments</strong>. Export a backup first if you need to keep the current data.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeResetModal()" style="padding:0 14px;height:32px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:13px;cursor:pointer">Cancel</button>
+      <button onclick="exportJson()" style="padding:0 14px;height:32px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:13px;cursor:pointer">Backup first</button>
+      <button onclick="confirmReset()" style="padding:0 16px;height:32px;border:none;border-radius:var(--r);background:#e2445c;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Yes, reset everything</button>
     </div>
   </div>
 </div>
@@ -754,6 +776,29 @@ function exportHtml(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([buildExportHtml()],{type:'text/html'}));
   a.download='monday_content_dev_plan.html';a.click();
+}
+
+// ── EXPORT JSON ──
+function exportJson(){
+  const data={version:1,exportedAt:new Date().toISOString(),nextId,STREAMS,TASKS};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download='board-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+// ── RESET ──
+function openResetModal(){document.getElementById('resetModal').style.display='flex';}
+function closeResetModal(){document.getElementById('resetModal').style.display='none';}
+function confirmReset(){
+  TASKS.length=0;
+  Object.keys(STREAMS).forEach(k=>delete STREAMS[k]);
+  nextId=1;
+  collapsed={};
+  closePanel();
+  closeResetModal();
+  buildFilters();
+  renderView();
 }
 
 // ── GITHUB SAVE ──
