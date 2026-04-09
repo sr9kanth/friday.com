@@ -2,7 +2,7 @@
 
 ## Project overview
 
-**Current version:** `v1.5.1` · `100426 092828` (DDMMYY HHMMSS) — shown in footer.
+**Current version:** `v1.5.2` · `100426 094034` (DDMMYY HHMMSS) — shown in footer.
 
 Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything lives in `index.html` — no framework, no build step, no dependencies.
 
