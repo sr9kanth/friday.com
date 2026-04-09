@@ -1,7 +1,7 @@
 <html lang="en"><head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Friday.com</title>
+        <title>Friday.com — Plan it. Do it. Friday.</title>
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <style>
             *,
@@ -222,6 +222,7 @@
             .grid-wrap {
                 flex: 1;
                 overflow: auto;
+                padding-bottom: 28px;
             }
 
             /* Table */
@@ -302,6 +303,7 @@
                 vertical-align: middle;
                 border-right: 1px solid var(--bd);
                 padding: 0 12px;
+                transition: background 0.12s ease;
             }
             tr.task-row td:last-child {
                 border-right: none;
@@ -474,6 +476,22 @@
             .grp-label:hover .grp-del {
                 opacity: 1 !important;
             }
+            .grp-drag-hdl {
+                cursor: grab;
+                color: var(--tx3);
+                padding: 0 2px;
+                font-size: 14px;
+                opacity: 0;
+                flex-shrink: 0;
+                transition: opacity 0.15s;
+                line-height: 1;
+                user-select: none;
+            }
+            .grp-label:hover .grp-drag-hdl {
+                opacity: 1;
+            }
+            .ghead.grp-dragging { opacity: 0.4; }
+            .ghead.grp-drag-over td { box-shadow: inset 0 3px 0 var(--acc); }
             .tour-hl {
                 box-shadow: 0 0 0 3px var(--acc), 0 0 0 9999px rgba(0,0,0,0.55) !important;
             }
@@ -623,16 +641,25 @@
                 position: relative;
                 display: flex;
                 align-items: center;
-                padding: 0 6px;
+                padding: 0 14px 0 6px;
                 font-size: 10px;
                 font-weight: 600;
                 color: rgba(255, 255, 255, 0.9);
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
+                box-sizing: border-box;
+                user-select: none;
             }
             .tl-bar:active {
                 cursor: grabbing;
+            }
+            .tl-bar-resize {
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 8px;
+                cursor: ew-resize;
+                background: rgba(0, 0, 0, 0.18);
+                border-radius: 0 6px 6px 0;
             }
             .tl-today {
                 position: absolute;
@@ -985,9 +1012,6 @@
     <body class="force-dark">
         <div class="topbar">
             <span class="board-title">Friday.com</span>
-            <div class="tb-sep" id="syncSep" style="display:none"></div>
-            <span id="syncStatus" style="font-size:11px;white-space:nowrap;color:var(--tx3);display:none"></span>
-            <span id="syncLastUpdated" style="font-size:10px;white-space:nowrap;color:var(--tx3);display:none;margin-left:6px"></span>
             <div class="tb-sep"></div>
             <button class="tb-btn" onclick="exportHtml()">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1091,6 +1115,7 @@
         </div>
 
         <div id="mainView" class="grid-wrap" style="">
+            <div id="emptyStateBanner" style="display:none"></div>
             <table class="board-table" id="boardTable">
                 <thead>
                     <tr>
@@ -2933,24 +2958,6 @@
                         Board snapshots
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px">
-                        <button onclick="fetchSnapshotsFromGithub()" title="Fetch snapshots from GitHub" style="
-                                display: flex;
-                                align-items: center;
-                                gap: 5px;
-                                padding: 0 10px;
-                                height: 28px;
-                                border: 1px solid var(--bd2);
-                                border-radius: var(--r);
-                                background: transparent;
-                                color: var(--tx2);
-                                font-size: 12px;
-                                cursor: pointer;
-                            ">
-                            <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13">
-                                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-                            </svg>
-                            Fetch
-                        </button>
                         <button onclick="closeBoardsModal()" style="
                                 width: 28px;
                                 height: 28px;
@@ -3753,11 +3760,11 @@
 
         <script>
             // ── VERSION ──
-            const APP_VERSION = '1.3';
-            const APP_UPDATED = '100426 002000'; // DDMMYY HHMMSS
+            const APP_VERSION = '1.5.1';
+            const APP_UPDATED = '100426 092828'; // DDMMYY HHMMSS
             document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById('appVersion');
-                if (el) el.textContent = 'v' + APP_VERSION;
+                if (el) el.textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
             });
 
             // ── SUPABASE CONFIG ──
@@ -4104,6 +4111,7 @@
             });
             let panelTaskId = null;
             let dragTaskId = null;
+            let dragGroupName = null;
             const KNOWN_OWNERS = ["SM", "SRI"];
             // Derive from current board tasks — clears any stale cross-board owners
             (function () {
@@ -4220,6 +4228,37 @@
                 });
                 const tbody = document.getElementById("boardBody");
                 tbody.innerHTML = "";
+
+                // ── Empty-state / all-done banners ──
+                const todayStr = TODAY.toISOString().slice(0, 10);
+                const allDone = TASKS.length > 0 && TASKS.every(t => t.status === 'Done');
+                const hasOverdue = TASKS.some(t => t.e && t.e < todayStr && t.status !== 'Done');
+                const emptyBanner = document.getElementById('emptyStateBanner');
+                if (emptyBanner) {
+                    if (TASKS.length === 0) {
+                        emptyBanner.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--tx3)">
+                            <div style="font-size:36px;margin-bottom:12px">📋</div>
+                            <div style="font-size:16px;font-weight:600;color:var(--tx2);margin-bottom:8px">Nothing here yet. Very Monday energy.</div>
+                            <div style="font-size:13px;margin-bottom:20px">Add your first task to get started.</div>
+                            <button class="btn-pri" onclick="openAddGroup()" style="padding:8px 20px;font-size:13px">+ Add a group</button>
+                        </div>`;
+                        emptyBanner.style.display = 'block';
+                    } else if (allDone) {
+                        emptyBanner.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--tx3)">
+                            <div style="font-size:36px;margin-bottom:10px">🎉</div>
+                            <div style="font-size:15px;font-weight:600;color:#00c875;margin-bottom:6px">Everything done. Now that's a Friday feeling.</div>
+                        </div>`;
+                        emptyBanner.style.display = 'block';
+                    } else if (hasOverdue) {
+                        emptyBanner.innerHTML = `<div style="padding:8px 16px;background:rgba(226,68,92,.08);border-left:3px solid #e2445c;margin:0 0 4px;font-size:12px;color:#e2445c;display:flex;align-items:center;gap:8px">
+                            <span>⏰</span><span>Some tasks didn't make it to Friday. <strong>Let's fix that.</strong></span>
+                        </div>`;
+                        emptyBanner.style.display = 'block';
+                    } else {
+                        emptyBanner.style.display = 'none';
+                    }
+                }
+
                 const totalDays = Math.ceil((MAX_D - MIN_D) / 86400000);
                 const tlW = totalDays * PPD;
                 const todayPx = px(TODAY.toISOString().slice(0, 10));
@@ -4272,15 +4311,34 @@
                     gnc.colSpan = 1;
                     const streamEsc = stream.replace(/'/g, "\\'");
                     gnc.innerHTML = `<div class="grp-label">
+      <span class="grp-drag-hdl" title="Drag to reorder group">⠿</span>
       <button class="grp-toggle ${isCollapsed ? "" : "open"}" onclick="toggleGroup('${streamEsc}')">
         <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"/></svg>
       </button>
-      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:${col}">${escH(stream)}</span>
+      <span class="grp-name" contenteditable="true" draggable="false" spellcheck="false" style="color:${col}">${escH(stream)}</span>
       <span class="grp-count">${items.length} item${items.length === 1 ? "" : "s"}</span>
       <button onclick="deleteGroup('${streamEsc}')" title="Delete group" style="margin-left:6px;opacity:0;padding:0 5px;height:20px;border:none;border-radius:4px;background:transparent;color:#e2445c;font-size:11px;cursor:pointer;flex-shrink:0" class="grp-del">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><polyline points="2 4 4 4 14 4"></polyline><path d="M5 4V2h6v2M6 7v5M10 7v5"></path><path d="M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"></path></svg>
       </button>
     </div>`;
+                    // Group drag handle — mousedown sets dragGroupName so dragstart knows it's intentional
+                    const hdl = gnc.querySelector('.grp-drag-hdl');
+                    if (hdl) hdl.addEventListener('mousedown', () => { dragGroupName = stream; });
+                    // Make entire group row draggable
+                    gr.draggable = true;
+                    gr.addEventListener('dragstart', (e) => {
+                        if (!dragGroupName) { e.preventDefault(); return; }
+                        dragTaskId = null;
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', dragGroupName);
+                        gr.classList.add('grp-dragging');
+                    });
+                    gr.addEventListener('dragend', () => {
+                        dragGroupName = null;
+                        document.querySelectorAll('.grp-dragging,.grp-drag-over,.drag-over').forEach(el =>
+                            el.classList.remove('grp-dragging', 'grp-drag-over', 'drag-over')
+                        );
+                    });
                     gr.appendChild(gnc);
                     // Fill remaining cols
                     const cols = ["", "", "", "", "", "", "", ""];
@@ -4312,25 +4370,43 @@
                         }
                         gr.appendChild(td);
                     });
-                    // Drop target: group header
+                    // Drop target: group header (accepts both task drops and group reorder)
                     gr.addEventListener("dragover", (e) => {
-                        if (!dragTaskId) return;
+                        if (!dragTaskId && (!dragGroupName || dragGroupName === stream)) return;
                         e.preventDefault();
                         e.dataTransfer.dropEffect = "move";
-                        gr.classList.add("drag-over");
+                        gr.classList.add(dragGroupName ? "grp-drag-over" : "drag-over");
                     });
                     gr.addEventListener("dragleave", () =>
-                        gr.classList.remove("drag-over"),
+                        gr.classList.remove("drag-over", "grp-drag-over"),
                     );
                     gr.addEventListener("drop", (e) => {
                         e.preventDefault();
-                        gr.classList.remove("drag-over");
-                        if (!dragTaskId) return;
-                        const task = TASKS.find((x) => x.id === dragTaskId);
-                        if (task && task.st !== stream) {
-                            task.st = stream;
-                            saveLiveState();
-                            renderView();
+                        gr.classList.remove("drag-over", "grp-drag-over");
+                        if (dragGroupName && dragGroupName !== stream) {
+                            // Reorder groups: move dragGroupName to just before stream
+                            const keys = Object.keys(STREAMS);
+                            const fromIdx = keys.indexOf(dragGroupName);
+                            const toIdx = keys.indexOf(stream);
+                            if (fromIdx !== -1 && toIdx !== -1) {
+                                keys.splice(fromIdx, 1);
+                                keys.splice(toIdx, 0, dragGroupName);
+                                // Mutate STREAMS in-place to preserve const binding
+                                const snap = {};
+                                keys.forEach(k => { snap[k] = STREAMS[k]; });
+                                Object.keys(STREAMS).forEach(k => delete STREAMS[k]);
+                                Object.assign(STREAMS, snap);
+                                saveLiveState();
+                                renderView();
+                            }
+                            dragGroupName = null;
+                        } else if (dragTaskId) {
+                            const task = TASKS.find((x) => x.id === dragTaskId);
+                            if (task && task.st !== stream) {
+                                task.st = stream;
+                                saveLiveState();
+                                renderView();
+                            }
                         }
                     });
                     tbody.appendChild(gr);
@@ -4502,8 +4578,21 @@
                             todayLine.style.left = todayPx + "px";
                             const bar = document.createElement("div");
                             bar.className = "tl-bar";
+                            bar.dataset.ganttBar = t.id;
                             bar.style.cssText = `left:${px(t.s)}px;width:${spx(t.s, t.e)}px;background:${col};position:absolute`;
                             bar.title = `${fmtD(t.s)} → ${fmtD(t.e)}`;
+                            bar.addEventListener('mousedown', (e) => {
+                                window._ganttMD(e, t.id, 'move');
+                            });
+                            // Resize handle
+                            const rh = document.createElement("div");
+                            rh.className = "tl-bar-resize";
+                            rh.title = "Drag to resize";
+                            rh.addEventListener('mousedown', (e) => {
+                                e.stopPropagation();
+                                window._ganttMD(e, t.id, 'resize');
+                            });
+                            bar.appendChild(rh);
                             wrap.appendChild(todayLine);
                             wrap.appendChild(bar);
                             tlc.appendChild(wrap);
@@ -4632,7 +4721,13 @@
                         if (t.s && t.e) {
                             const bL = px(t.s),
                                 bW = spx(t.s, t.e);
-                            barHtml = `<div title="${t.nm}: ${fmtD(t.s)}–${fmtD(t.e)}" style="position:absolute;left:${bL}px;width:${bW}px;height:18px;top:9px;border-radius:6px;background:${col};z-index:3;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:700;color:rgba(255,255,255,.9);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:grab">${t.nm}</div>`;
+                            barHtml = `<div data-gantt-bar="${t.id}" title="${t.nm}: ${fmtD(t.s)}–${fmtD(t.e)}"
+                              style="position:absolute;left:${bL}px;width:${bW}px;height:18px;top:9px;border-radius:6px;background:${col};z-index:3;display:flex;align-items:center;padding:0 14px 0 6px;font-size:9px;font-weight:700;color:rgba(255,255,255,.9);cursor:grab;user-select:none;box-sizing:border-box"
+                              onmousedown="window._ganttMD(event,${t.id},'move')">
+                              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none">${t.nm}</span>
+                              <div title="Drag to resize" style="position:absolute;right:0;top:0;bottom:0;width:8px;cursor:ew-resize;border-radius:0 6px 6px 0;background:rgba(0,0,0,.15)"
+                                onmousedown="window._ganttMD(event,${t.id},'resize');event.stopPropagation()"></div>
+                            </div>`;
                         }
                         rightRows += `<div style="height:${RH}px;border-bottom:1px solid var(--bd);position:relative">
         <div style="position:absolute;top:0;bottom:0;left:${todayPx}px;width:2px;background:#e2445c;z-index:2;pointer-events:none"></div>
@@ -4741,6 +4836,58 @@
                 renderView();
                 buildFilters();
             }
+
+            // ── GANTT BAR DRAG / RESIZE ──
+            function _addDays(dateStr, days) {
+                if (!days) return dateStr;
+                const d = new Date(dateStr + 'T00:00:00');
+                d.setDate(d.getDate() + days);
+                return d.toISOString().slice(0, 10);
+            }
+            let _gantDrag = null;
+            window._ganttMD = function(e, taskId, mode) {
+                e.preventDefault();
+                e.stopPropagation();
+                const task = TASKS.find(x => x.id === taskId);
+                if (!task || !task.s || !task.e) return;
+                _gantDrag = { taskId, mode, startX: e.clientX, origS: task.s, origE: task.e, currentDays: 0 };
+                function onMove(e2) {
+                    if (!_gantDrag) return;
+                    const days = Math.round((e2.clientX - _gantDrag.startX) / 3.5);
+                    _gantDrag.currentDays = days;
+                    const barEl = document.querySelector(`[data-gantt-bar="${_gantDrag.taskId}"]`);
+                    if (!barEl) return;
+                    if (_gantDrag.mode === 'move') {
+                        barEl.style.transform = `translateX(${Math.round(days * 3.5)}px)`;
+                    } else {
+                        const origDays = Math.round((new Date(_gantDrag.origE) - new Date(_gantDrag.origS)) / 86400000);
+                        const newDays = Math.max(1, origDays + days);
+                        barEl.style.width = Math.round(newDays * 3.5) + 'px';
+                    }
+                }
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    if (!_gantDrag) return;
+                    const { taskId: tid, mode: m, origS, origE, currentDays } = _gantDrag;
+                    _gantDrag = null;
+                    if (currentDays !== 0) {
+                        const t = TASKS.find(x => x.id === tid);
+                        if (t) {
+                            if (m === 'move') {
+                                t.s = _addDays(origS, currentDays);
+                                t.e = _addDays(origE, currentDays);
+                            } else {
+                                const newE = _addDays(origE, currentDays);
+                                if (newE > t.s) t.e = newE;
+                            }
+                            saveLiveState();
+                        }
+                    }
+                    renderView();
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp, { once: true });
+            };
             function openPriPopup(e, id) {
                 const opts = [
                     ["High", "p-hi", "#e2445c"],
@@ -5435,9 +5582,6 @@
         <button onclick="updateSnapshot(${s.id})" title="Overwrite with current board" style="padding:0 8px;height:28px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:var(--tx2);font-size:12px;cursor:pointer;display:flex;align-items:center">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M13.5 2.5v4h-4"/><path d="M2 8a6 6 0 0110.3-4.2L13.5 6.5"/><path d="M2.5 13.5v-4h4"/><path d="M14 8a6 6 0 01-10.3 4.2L2.5 9.5"/></svg>
         </button>
-        <button onclick="saveSnapshotToGithub(${s.id})" title="Push to GitHub" style="padding:0 8px;height:28px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:var(--tx2);font-size:12px;cursor:pointer;display:flex;align-items:center">
-          <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-        </button>
         <button onclick="deleteSnapshot(${s.id})" style="padding:0 12px;height:28px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:#e2445c;font-size:12px;cursor:pointer">Delete</button>
       </div>
     </div>`;
@@ -5451,125 +5595,6 @@
             }
             function closeBoardsModal() {
                 document.getElementById("boardsModal").style.display = "none";
-            }
-
-            async function saveSnapshotToGithub(id) {
-                const s = getGhSettings();
-                if (!s.token) {
-                    openGhModal();
-                    return;
-                }
-                const snap = getSnapshots().find((x) => x.id === id);
-                if (!snap) return;
-                const filePath = "snapshots/" + id + ".json";
-                const hdrs = {
-                    Authorization: "token " + s.token,
-                    Accept: "application/vnd.github.v3+json",
-                };
-                setSaveStatus("Pushing snapshot…", "var(--tx3)");
-                try {
-                    let sha;
-                    const getRes = await fetch(
-                        `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${filePath}`,
-                        { headers: hdrs },
-                    );
-                    if (getRes.ok) {
-                        const meta = await getRes.json();
-                        sha = meta.sha;
-                    } else if (getRes.status !== 404)
-                        throw new Error("GET " + getRes.status);
-                    const content = btoa(
-                        unescape(
-                            encodeURIComponent(JSON.stringify(snap, null, 2)),
-                        ),
-                    );
-                    const body = {
-                        message: `Snapshot: ${snap.name}`,
-                        content,
-                        ...(sha ? { sha } : {}),
-                    };
-                    const putRes = await fetch(
-                        `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${filePath}`,
-                        {
-                            method: "PUT",
-                            headers: {
-                                ...hdrs,
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(body),
-                        },
-                    );
-                    if (!putRes.ok) throw new Error("PUT " + putRes.status);
-                    setSaveStatus("Snapshot pushed ✓", "#00c875");
-                    setTimeout(() => setSaveStatus("", ""), 4000);
-                } catch (err) {
-                    setSaveStatus("Error: " + err.message, "#e2445c");
-                }
-            }
-
-            async function fetchSnapshotsFromGithub() {
-                const s = getGhSettings();
-                if (!s.token) {
-                    openGhModal();
-                    return;
-                }
-                const hdrs = {
-                    Authorization: "token " + s.token,
-                    Accept: "application/vnd.github.v3+json",
-                };
-                setSaveStatus("Fetching snapshots…", "var(--tx3)");
-                try {
-                    const dirRes = await fetch(
-                        `https://api.github.com/repos/${s.owner}/${s.repo}/contents/snapshots`,
-                        { headers: hdrs },
-                    );
-                    if (dirRes.status === 404) {
-                        setSaveStatus(
-                            "No snapshots folder on GitHub",
-                            "var(--tx3)",
-                        );
-                        setTimeout(() => setSaveStatus("", ""), 3000);
-                        return;
-                    }
-                    if (!dirRes.ok) throw new Error("GET " + dirRes.status);
-                    const files = await dirRes.json();
-                    const jsonFiles = files.filter((f) =>
-                        f.name.endsWith(".json"),
-                    );
-                    const existing = getSnapshots();
-                    const existingIds = new Set(
-                        existing.map((x) => String(x.id)),
-                    );
-                    let added = 0;
-                    for (const f of jsonFiles) {
-                        const fRes = await fetch(f.download_url);
-                        if (!fRes.ok) continue;
-                        try {
-                            const snap = await fRes.json();
-                            if (
-                                snap.id &&
-                                snap.TASKS &&
-                                snap.STREAMS &&
-                                !existingIds.has(String(snap.id))
-                            ) {
-                                existing.push(snap);
-                                existingIds.add(String(snap.id));
-                                added++;
-                            }
-                        } catch {}
-                    }
-                    localStorage.setItem(SNAP_KEY, JSON.stringify(existing));
-                    renderBoardsList();
-                    setSaveStatus(
-                        added
-                            ? `${added} snapshot${added > 1 ? "s" : ""} imported ✓`
-                            : "All snapshots already local",
-                        "#00c875",
-                    );
-                    setTimeout(() => setSaveStatus("", ""), 4000);
-                } catch (err) {
-                    setSaveStatus("Error: " + err.message, "#e2445c");
-                }
             }
 
             // ── RESET ──
@@ -6151,17 +6176,13 @@
                 localStorage.setItem('fridayShareUpdatedAt', shareUpdatedAt);
                 const el = document.getElementById('syncLastUpdated');
                 if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = 'inline'; }
-                const sep = document.getElementById('syncSep');
-                if (sep) sep.style.display = 'block';
                 const modal = document.getElementById('shareLastSynced');
                 if (modal) modal.textContent = 'Last synced: ' + shareUpdatedAt;
             }
-            // Restore topbar timestamp on load
+            // Restore footer timestamp on load
             (function(){ if (shareCode && shareUpdatedAt) {
                 const el = document.getElementById('syncLastUpdated');
                 if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = 'inline'; }
-                const sep = document.getElementById('syncSep');
-                if (sep) sep.style.display = 'block';
             }})();
 
             function setSyncStatus(msg, color) {
@@ -6266,13 +6287,13 @@
 
             // ── TOUR ──
             const TOUR_STEPS = [
-                { title: '👋 Welcome to Friday.com', desc: 'A lightweight project board for your team. This quick tour covers the key features — takes about 30 seconds.' },
-                { title: '📋 Main table & Gantt', desc: 'Switch views using the tabs in the toolbar. Main table shows all tasks in groups; Gantt shows a timeline bar chart.', el: 'vtMain' },
+                { title: '👋 Welcome to Friday.com', desc: 'Because let\'s be honest — everyone prefers Friday to Monday.' },
+                { title: '📋 What it does', desc: 'Friday.com is a lightweight project board for your team. Group tasks, track status, assign owners, and visualise timelines — all in one place, no sign-up required.', el: 'vtMain' },
                 { title: '🔍 Search & Filter', desc: 'Type in the search box to filter tasks by name. Use the dropdowns to filter by group, status, or owner.', el: 'searchInp' },
                 { title: '✅ Tasks', desc: 'Click any task row to open the side panel — edit details, set dates, assign owners, change status, and leave comments.', el: null },
                 { title: '➕ Adding tasks & groups', desc: 'Use "+ Add task" inside any group to add a task. Use "+ New group" in the top-right to create a new group.', el: 'openAddGroup' },
                 { title: '🔗 Share & live sync', desc: 'Click Share to generate a 6-char code. Send it to teammates — they join via the Join tab. Changes sync automatically every 15 seconds.', el: 'shareBtn' },
-                { title: '💾 Boards & backups', desc: 'Save named snapshots via the Boards button. Export HTML or Backup JSON for offline copies.', el: null },
+                { title: '💾 Boards & backups', desc: 'Save named snapshots via the Boards button. Export HTML or Backup JSON for offline copies. Now go make it a Friday. 🎉', el: null },
             ];
             let _tourStep = 0;
 
@@ -6358,7 +6379,13 @@
         </div>
 
         <!-- Version stamp (bottom-right) -->
-        <div id="appVersion" style="position:fixed;bottom:8px;right:12px;font-size:10px;color:var(--tx3);pointer-events:none;z-index:10;user-select:none"></div>
+        <div id="footerBar" style="position:fixed;bottom:0;left:0;right:0;height:22px;background:var(--bg);border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:10;pointer-events:none;user-select:none">
+            <div style="display:flex;align-items:center;gap:10px">
+                <span id="syncStatus" style="font-size:10px;color:var(--acc);display:none"></span>
+                <span id="syncLastUpdated" style="font-size:10px;color:var(--tx3);display:none"></span>
+            </div>
+            <span id="appVersion" style="font-size:10px;color:var(--tx3)"></span>
+        </div>
 
         <plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.37783462112409071775736152470"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.72518089277379131775737001381"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.99506582531271651775737613615"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.43656394689935231775738039254"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui>
     

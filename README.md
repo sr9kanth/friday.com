@@ -1,27 +1,42 @@
 # Friday.com
 
-**v1.3** · `100426 002000`
+**v1.5.1** · `100426 092828`
 
 A Monday.com-style project board that runs entirely as a single HTML file — no framework, no build step, no server required.
 
 ## Features
 
 - **Board view** — tasks in color-coded groups with status, priority, owner, dates, effort, timeframe, and timeline columns
-- **Gantt view** — timeline visualization across all groups with month headers
-- **Drag & drop** — reorder tasks or move them between groups
+- **Gantt view** — timeline visualization across all groups with month/week headers
+- **Drag & drop tasks** — reorder tasks within a group or move them between groups
+- **Drag & drop groups** — reorder groups by dragging the ⠿ grip handle on any group header
+- **Editable timeline bars** — drag any bar (in both Main table and Gantt) to move a task; drag the right edge to resize (change end date)
 - **Task panel** — click any task to open a side panel with full details, owner picker, and comments
 - **Custom statuses** — add your own status values beyond Done / In progress / Stuck; each gets a unique color
 - **Custom owners** — add people by initials (up to 4 chars); owners are board-specific and don't bleed across boards
 - **Delete task** — trash button in the task side panel
 - **Delete group** — hover the group header to reveal a trash icon; removes the group and all its tasks
 - **Dark mode** — toggle in the topbar; preference saved to localStorage
-- **Boards (snapshots)** — save named snapshots, load, overwrite, or push/fetch to GitHub
+- **Boards (snapshots)** — save named snapshots locally; load, overwrite, or delete at any time
 - **Backup JSON / Load JSON** — export and restore full board state as a file
 - **Export HTML** — export current board as a standalone `.html` with all data baked in
 - **Share board** — Supabase-backed sharing with a 6-char code; collaborators join via the Join tab
-- **Live sync** — auto-pushes changes 3s after every edit; auto-pulls every 15s; topbar shows `⟳ Live sync on` and last synced timestamp
+- **Live sync** — auto-pushes changes 3s after every edit; auto-pulls every 15s; footer shows `⟳ Live sync on` and last synced timestamp
+- **Smart empty states** — contextual messages when board is empty, all tasks are done, or tasks are overdue
+- **First-run tour** — 7-step spotlight walkthrough shown on first visit
 - **Save to GitHub** — publishes the app shell (with default demo data) to GitHub Pages; personal board data stays in localStorage only
-- **Version stamp** — `v{version} · {DDMMYY HHMMSS}` in the topbar so you can always confirm which version is live
+- **Version stamp** — `v{version}` in the footer so you can always confirm which version is live
+
+## Timeline Editing
+
+Timeline bars in **both** the Main table and Gantt view are interactive:
+
+| Action | Result |
+|---|---|
+| Drag bar body | Moves the task (shifts start + end date) |
+| Drag right edge | Resizes the task (changes end date only) |
+
+Changes snap to whole days and are saved automatically on mouse release.
 
 ## Live Sync Flow
 
@@ -71,7 +86,6 @@ The anon/publishable key is safe to be public — Supabase Row Level Security is
 | Last sync timestamp | `localStorage` → `fridayShareUpdatedAt` |
 | Last remote timestamp | `localStorage` → `fridayShareRemoteUpdatedAt` |
 | Shared boards | Supabase → `boards` table |
-| GitHub snapshots | GitHub repo → `snapshots/{id}.json` |
 | App code | GitHub repo → `index.html` (default demo data only — not personal data) |
 
 ## Default Data
