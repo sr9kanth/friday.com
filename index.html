@@ -250,7 +250,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
   <button class="tb-btn" onclick="openGhModal()" title="GitHub settings" style="padding:0 7px">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="2.5"></circle><path d="M8 2.5v-1M8 14.5v-1M2.5 8h-1M14.5 8h-1M4.1 4.1l-.7-.7M12.6 12.6l-.7-.7M4.1 11.9l-.7.7M12.6 3.4l-.7.7M5.5 8a2.5 2.5 0 105 0 2.5 2.5 0 00-5 0z"></path></svg>
   </button>
-  <span id="saveStatus" style="font-size:11px;color:var(--tx3);white-space:nowrap">Saving…</span>
+  <span id="saveStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3);">Saving…</span>
   <div class="spacer"></div>
   <button class="tb-btn">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"></circle><path d="M11 11l2.5 2.5"></path></svg>
@@ -275,7 +275,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M4 8h8M6 12h4"></path></svg>
       Filter
     </button>
-    <select class="flt" id="streamFil" onchange="renderView()"><option value="all">All groups</option><option value="LRS R3">LRS R3</option><option value="MFR">MFR</option><option value="LRS R4">LRS R4</option></select>
+    <select class="flt" id="streamFil" onchange="renderView()"><option value="all">All groups</option><option value="LRS R3">LRS R3</option><option value="MFR">MFR</option><option value="LRS R4">LRS R4</option><option value="Backlog">Backlog</option></select>
     <select class="flt" id="statusFil" onchange="renderView()"><option value="all">All statuses</option><option value="Done">Done</option><option value="In progress">In progress</option><option value="">No status</option></select>
     <select class="flt" id="leadFil" onchange="renderView()"><option value="all">All owners</option><option value="SM">SM</option></select>
   </div>
@@ -340,6 +340,15 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
       <span class="grp-name" contenteditable="true" spellcheck="false" style="color:#579bfc">LRS R4</span>
       <span class="grp-count">0 items</span>
     </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"></div></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('LRS R4')">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
+      Add task
+    </button></td></tr><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(253, 171, 61);"><div class="grp-label">
+      <button class="grp-toggle open" onclick="toggleGroup('Backlog')">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"></path></svg>
+      </button>
+      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:#fdab3d">Backlog</span>
+      <span class="grp-count">0 items</span>
+    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"></div></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('Backlog')">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
       Add task
     </button></td></tr><tr class="add-group"><td colspan="9"><button class="add-group-btn" onclick="openAddGroup()">
@@ -546,7 +555,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 <div class="popup" id="popup" style="display: none; left: 1175px; top: 188px;"><div class="popup-item" onclick="setPri(1,'High')"><div class="popup-dot" style="background:#e2445c"></div>High</div><div class="popup-item" onclick="setPri(1,'Medium')"><div class="popup-dot" style="background:#fdab3d"></div>Medium</div><div class="popup-item" onclick="setPri(1,'Low')"><div class="popup-dot" style="background:#00c875"></div>Low</div><div class="popup-item" onclick="setPri(1,'')"><div class="popup-dot" style="background:#c3c6d4"></div>—</div></div>
 
 <script>
-const STREAMS={"LRS R3":"#7b5ea7","MFR":"#00c875","LRS R4":"#579bfc"};
+const STREAMS={"LRS R3":"#7b5ea7","MFR":"#00c875","LRS R4":"#579bfc","Backlog":"#fdab3d"};
 const AV_COLORS={"AL":"#a25ddc","JM":"#00c875","SR":"#fdab3d","TF":"#579bfc","MS":"#e2445c","PM":"#ff642e","CC":"#676879","SM":"#6c6cff"};
 const PRIORITIES={'':'p-none','Low':'p-lo','Medium':'p-med','High':'p-hi'};
 let TASKS=[{"id":1,"st":"LRS R3","nm":"Refusal DocGen Letters","ld":["SM"],"ef":"","tf":"","s":"2026-04-06","e":"2026-04-15","status":"In progress","pri":"Medium","comments":[{"author":"TF","text":"Aiming to release for R2","ts":"9/04 22:30"}]},{"id":2,"st":"LRS R3","nm":"Applicant tracking​","ld":["SM"],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":3,"st":"LRS R3","nm":"LRS/Janison​ Integration","ld":["SM"],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]}];
