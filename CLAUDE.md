@@ -2,6 +2,8 @@
 
 ## Project overview
 
+**Current version:** `v1.0` · `090426 235730` (DDMMYY HHMMSS) — shown in topbar next to title.
+
 Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything lives in `index.html` — no framework, no build step, no dependencies.
 
 ## Architecture
@@ -49,6 +51,12 @@ Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything liv
 ```
 
 ## Important patterns
+
+### Version stamp
+- `APP_VERSION` and `APP_UPDATED` constants at the very top of the `<script>` tag
+- `APP_UPDATED` format: `DDMMYY HHMMSS` — update manually on every meaningful release
+- Rendered into `#appVersion` span in the topbar via `DOMContentLoaded`
+- Run `date "+%d%m%y %H%M%S"` to get the current timestamp
 
 ### Adding new state that must persist
 1. Add to `saveLiveState()` serialization object
