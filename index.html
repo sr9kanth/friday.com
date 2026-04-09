@@ -3752,8 +3752,8 @@
 
         <script>
             // ── VERSION ──
-            const APP_VERSION = '1.2';
-            const APP_UPDATED = '100426 001500'; // DDMMYY HHMMSS
+            const APP_VERSION = '1.3';
+            const APP_UPDATED = '100426 002000'; // DDMMYY HHMMSS
             document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById('appVersion');
                 if (el) el.textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
@@ -6086,6 +6086,15 @@
                 }
                 if (!silent) setShareStatus("Pushing update…");
                 try {
+                    // Before silent auto-push: check if remote is newer.
+                    // If so, pull instead — prevents overwriting a delete/change from another window.
+                    if (silent && shareRemoteUpdatedAt) {
+                        const { data: check } = await sb.from("boards").select("updated_at").eq("code", shareCode).single();
+                        if (check && new Date(check.updated_at) > new Date(shareRemoteUpdatedAt)) {
+                            await pullSharedBoard(true);
+                            return;
+                        }
+                    }
                     const data = boardSnapshot();
                     const ts = new Date().toISOString();
                     const { error } = await sb
