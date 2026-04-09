@@ -212,6 +212,10 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
     Backup JSON
   </button>
   <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="openBoardsModal()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="14" height="4" rx="1"/><rect x="1" y="9" width="6" height="5" rx="1"/><rect x="9" y="9" width="6" height="5" rx="1"/></svg>
+    Boards
+  </button>
   <button class="tb-btn" onclick="openResetModal()" style="color:#e2445c" title="Delete all data and start over">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2 4 4 4 14 4"/><path d="M5 4V2h6v2M6 7v5M10 7v5"/><path d="M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"/></svg>
     Reset
@@ -313,15 +317,38 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
   </div>
 </div>
 
+<!-- Boards modal -->
+<div id="boardsModal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.45);align-items:center;justify-content:center">
+  <div style="background:var(--bg);border-radius:var(--r);padding:24px;width:460px;max-width:94vw;max-height:82vh;display:flex;flex-direction:column;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0">
+      <div style="font-size:15px;font-weight:700;color:var(--tx)">Board snapshots</div>
+      <button onclick="closeBoardsModal()" style="width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:20px;color:var(--tx2);display:flex;align-items:center;justify-content:center">&#x2715;</button>
+    </div>
+    <div style="margin-bottom:16px;flex-shrink:0">
+      <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Save current board as</div>
+      <div style="display:flex;gap:8px">
+        <input id="boardNameInp" type="text" placeholder="e.g. Q2 Planning, Week 3…" style="flex:1;border:1px solid var(--bd2);border-radius:6px;padding:7px 10px;font-size:13px;background:var(--bg);color:var(--tx);outline:none">
+        <button onclick="saveCurrentBoard()" style="padding:0 16px;height:34px;border:none;border-radius:6px;background:var(--acc);color:#fff;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0">Save</button>
+      </div>
+    </div>
+    <div style="height:1px;background:var(--bd);margin-bottom:14px;flex-shrink:0"></div>
+    <div id="boardsList" style="overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
 <!-- Reset confirmation modal -->
 <div id="resetModal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.45);align-items:center;justify-content:center">
-  <div style="background:var(--bg);border-radius:var(--r);padding:24px;width:360px;max-width:92vw;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
+  <div style="background:var(--bg);border-radius:var(--r);padding:24px;width:380px;max-width:92vw;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
     <div style="font-size:15px;font-weight:700;color:#e2445c;margin-bottom:8px">Reset board?</div>
-    <div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:20px">This will permanently delete <strong>all tasks, groups, and comments</strong>. Export a backup first if you need to keep the current data.</div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:14px">This will clear <strong>all tasks, groups, and comments</strong> from the current session.</div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx2);margin-bottom:20px;cursor:pointer">
+      <input type="checkbox" id="resetPushGh" style="width:14px;height:14px;accent-color:var(--acc)">
+      Also push empty board to GitHub (makes it permanent)
+    </label>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button onclick="closeResetModal()" style="padding:0 14px;height:32px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:13px;cursor:pointer">Cancel</button>
-      <button onclick="exportJson()" style="padding:0 14px;height:32px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:13px;cursor:pointer">Backup first</button>
-      <button onclick="confirmReset()" style="padding:0 16px;height:32px;border:none;border-radius:var(--r);background:#e2445c;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Yes, reset everything</button>
+      <button onclick="saveCurrentBoard('Pre-reset backup');exportJson()" style="padding:0 14px;height:32px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:13px;cursor:pointer">Backup first</button>
+      <button onclick="confirmReset()" style="padding:0 16px;height:32px;border:none;border-radius:var(--r);background:#e2445c;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Yes, reset</button>
     </div>
   </div>
 </div>
@@ -787,6 +814,72 @@ function exportJson(){
   a.click();
 }
 
+// ── BOARD SNAPSHOTS ──
+const SNAP_KEY='boardSnapshots';
+function getSnapshots(){try{return JSON.parse(localStorage.getItem(SNAP_KEY))||[];}catch{return[];}}
+
+function saveCurrentBoard(forceName){
+  const nameEl=document.getElementById('boardNameInp');
+  const name=(forceName||(nameEl&&nameEl.value.trim())||'Board '+new Date().toLocaleDateString('en-AU'));
+  const snaps=getSnapshots();
+  snaps.unshift({id:Date.now(),name,savedAt:new Date().toISOString(),nextId,
+    STREAMS:JSON.parse(JSON.stringify(STREAMS)),
+    TASKS:JSON.parse(JSON.stringify(TASKS))});
+  localStorage.setItem(SNAP_KEY,JSON.stringify(snaps));
+  if(nameEl&&!forceName)nameEl.value='';
+  renderBoardsList();
+}
+
+function loadSnapshot(id){
+  const snap=getSnapshots().find(s=>s.id===id);
+  if(!snap)return;
+  TASKS.length=0;
+  TASKS.push(...snap.TASKS.map(t=>({...t,comments:t.comments||[]})));
+  Object.keys(STREAMS).forEach(k=>delete STREAMS[k]);
+  Object.assign(STREAMS,snap.STREAMS);
+  nextId=snap.nextId||TASKS.length+1;
+  collapsed={};
+  closePanel();
+  closeBoardsModal();
+  buildFilters();
+  renderView();
+}
+
+function deleteSnapshot(id){
+  const snaps=getSnapshots().filter(s=>s.id!==id);
+  localStorage.setItem(SNAP_KEY,JSON.stringify(snaps));
+  renderBoardsList();
+}
+
+function renderBoardsList(){
+  const el=document.getElementById('boardsList');
+  if(!el)return;
+  const snaps=getSnapshots();
+  if(!snaps.length){
+    el.innerHTML='<p style="font-size:12px;color:var(--tx3);text-align:center;padding:20px 0">No saved boards yet.<br>Save the current board above to get started.</p>';
+    return;
+  }
+  el.innerHTML=snaps.map(s=>{
+    const d=new Date(s.savedAt);
+    const dateStr=d.getDate()+'/'+(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(2)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const tc=s.TASKS.length;
+    const gc=Object.keys(s.STREAMS||{}).length;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;gap:12px">
+      <div style="min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(s.name)}</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:2px">${tc} task${tc===1?'':'s'} &middot; ${gc} group${gc===1?'':'s'} &middot; ${dateStr}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button onclick="loadSnapshot(${s.id})" style="padding:0 12px;height:28px;border:none;border-radius:6px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;cursor:pointer">Load</button>
+        <button onclick="deleteSnapshot(${s.id})" style="padding:0 12px;height:28px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:#e2445c;font-size:12px;cursor:pointer">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openBoardsModal(){renderBoardsList();document.getElementById('boardsModal').style.display='flex';}
+function closeBoardsModal(){document.getElementById('boardsModal').style.display='none';}
+
 // ── RESET ──
 function openResetModal(){document.getElementById('resetModal').style.display='flex';}
 function closeResetModal(){document.getElementById('resetModal').style.display='none';}
@@ -799,6 +892,11 @@ function confirmReset(){
   closeResetModal();
   buildFilters();
   renderView();
+  if(document.getElementById('resetPushGh')?.checked){
+    const s=getGhSettings();
+    if(s.token)doGhSave(s);
+    else{openGhModal();setSaveStatus('Set token to push empty board','var(--tx3)');}
+  }
 }
 
 // ── GITHUB SAVE ──
