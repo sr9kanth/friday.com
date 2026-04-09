@@ -113,6 +113,7 @@ tr.add-group td{height:36px;background:var(--bg);padding:8px 12px}
 .grp-name{font-size:13px;font-weight:700;cursor:text;border-radius:4px;padding:2px 6px}
 .grp-name:focus{outline:2px solid var(--acc)}
 .grp-count{font-size:11px;font-weight:400;color:var(--tx3);margin-left:2px}
+.grp-label:hover .grp-del{opacity:1!important}
 
 /* Cell chips */
 .chip{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 10px;border-radius:var(--r);font-size:11px;font-weight:500;white-space:nowrap;cursor:pointer;border:none;outline:none;min-width:60px}
@@ -668,6 +669,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 const STREAMS={"LRS R3":"#7b5ea7","MFR":"#00c875","LRS R4":"#579bfc","Backlog":"#fdab3d"};
 const AV_COLORS={"AL":"#a25ddc","JM":"#00c875","SR":"#fdab3d","TF":"#579bfc","MS":"#e2445c","PM":"#ff642e","CC":"#676879","SM":"#6c6cff","SRI":"#008060"};
 const PRIORITIES={'':'p-none','Low':'p-lo','Medium':'p-med','High':'p-hi'};
+const STATUS_COLORS={'Done':'#00c875','In progress':'#fdab3d','Stuck':'#e2445c'};
 let TASKS=[{"id":1,"st":"LRS R3","nm":"Refusal DocGen Letters","ld":["SRI"],"ef":"","tf":"","s":"2026-04-06","e":"2026-04-15","status":"In progress","pri":"Medium","comments":[{"author":"TF","text":"Aiming to release for R2","ts":"9/04 22:30"}]},{"id":2,"st":"LRS R3","nm":"Applicant tracking​","ld":["SRI"],"ef":"","tf":"","s":"2026-04-13","e":"2026-04-17","status":"","pri":"","comments":[]},{"id":3,"st":"LRS R3","nm":"LRS/Janison​ Integration","ld":["SRI"],"ef":"","tf":"","s":"2026-04-06","e":"2026-04-30","status":"","pri":"","comments":[]},{"id":4,"st":"MFR","nm":"Scoping","ld":["SRI"],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":6,"st":"LRS R4","nm":"Embedded RFI Online Form","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":5,"st":"Backlog","nm":"Mutual Recognition Online Form","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":7,"st":"LRS R4","nm":"Digital Tech Ref","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":8,"st":"Backlog","nm":"Building Designer Online Form","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":9,"st":"Backlog","nm":"Test","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]}];
 let nextId=10, currentView='main', collapsed={};
 
@@ -683,11 +685,11 @@ const LIVE_KEY='fridayBoardState';
     Object.assign(STREAMS,d.STREAMS||{});
     nextId=d.nextId||1;
     if(d.AV_COLORS){Object.keys(AV_COLORS).forEach(k=>delete AV_COLORS[k]);Object.assign(AV_COLORS,d.AV_COLORS);}
+    if(d.STATUS_COLORS){Object.keys(STATUS_COLORS).forEach(k=>delete STATUS_COLORS[k]);Object.assign(STATUS_COLORS,d.STATUS_COLORS);}
   }catch(e){}
 })();
-// Derive KNOWN_OWNERS from tasks actually on this board (clears stale cross-board accumulation)
 function saveLiveState(){
-  try{localStorage.setItem(LIVE_KEY,JSON.stringify({TASKS:JSON.parse(JSON.stringify(TASKS)),STREAMS:JSON.parse(JSON.stringify(STREAMS)),nextId,AV_COLORS:{...AV_COLORS}}));}catch(e){}
+  try{localStorage.setItem(LIVE_KEY,JSON.stringify({TASKS:JSON.parse(JSON.stringify(TASKS)),STREAMS:JSON.parse(JSON.stringify(STREAMS)),nextId,AV_COLORS:{...AV_COLORS},STATUS_COLORS:{...STATUS_COLORS}}));}catch(e){}
 }
 
 TASKS.forEach(t=>{if(!t.comments)t.comments=[];});
@@ -707,10 +709,14 @@ function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d)-TODAY)/864
 
 // ── FILTERS ──
 function buildFilters(){
-  const sf=document.getElementById('streamFil'),lf=document.getElementById('leadFil');
-  const sv=sf.value,lv=lf.value;
+  const sf=document.getElementById('streamFil'),stf=document.getElementById('statusFil'),lf=document.getElementById('leadFil');
+  const sv=sf.value,stv=stf.value,lv=lf.value;
   sf.innerHTML='<option value="all">All groups</option>';
   Object.keys(STREAMS).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(s===sv)o.selected=true;sf.appendChild(o);});
+  stf.innerHTML='<option value="all">All statuses</option>';
+  const usedStatuses=[...new Set(TASKS.map(t=>t.status))].filter(Boolean).sort();
+  [...new Set([...Object.keys(STATUS_COLORS),...usedStatuses])].forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(s===stv)o.selected=true;stf.appendChild(o);});
+  const emptyOpt=document.createElement('option');emptyOpt.value='';emptyOpt.textContent='No status';if(stv==='')emptyOpt.selected=true;stf.appendChild(emptyOpt);
   lf.innerHTML='<option value="all">All owners</option>';
   [...new Set(TASKS.flatMap(t=>t.ld))].filter(Boolean).sort().forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;if(l===lv)o.selected=true;lf.appendChild(o);});
 }
@@ -765,12 +771,16 @@ function renderMain(){
     const gr=document.createElement('tr');gr.className='ghead';
     const gnc=document.createElement('td');gnc.className='name-td';gnc.style.borderLeft=`4px solid ${col}`;
     gnc.colSpan=1;
+    const streamEsc=stream.replace(/'/g,"\\'");
     gnc.innerHTML=`<div class="grp-label">
-      <button class="grp-toggle ${isCollapsed?'':'open'}" onclick="toggleGroup('${stream.replace(/'/g,"\\'")}')">
+      <button class="grp-toggle ${isCollapsed?'':'open'}" onclick="toggleGroup('${streamEsc}')">
         <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"/></svg>
       </button>
-      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:${col}">${stream}</span>
+      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:${col}">${escH(stream)}</span>
       <span class="grp-count">${items.length} item${items.length===1?'':'s'}</span>
+      <button onclick="deleteGroup('${streamEsc}')" title="Delete group" style="margin-left:6px;opacity:0;padding:0 5px;height:20px;border:none;border-radius:4px;background:transparent;color:#e2445c;font-size:11px;cursor:pointer;flex-shrink:0" class="grp-del">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><polyline points="2 4 4 4 14 4"></polyline><path d="M5 4V2h6v2M6 7v5M10 7v5"></path><path d="M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"></path></svg>
+      </button>
     </div>`;
     gr.appendChild(gnc);
     // Fill remaining cols
@@ -855,7 +865,7 @@ function renderMain(){
 
       // Status
       const sc=document.createElement('td');
-      sc.innerHTML=`<button class="chip ${t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':'c-none'}" onclick="openStatusPopup(event,${t.id})">${t.status||'—'}</button>`;
+      sc.innerHTML=`<button class="chip" style="${statusChipStyle(t.status)}" onclick="openStatusPopup(event,${t.id})">${escH(t.status)||'—'}</button>`;
       row.appendChild(sc);
 
       // Priority
@@ -979,7 +989,7 @@ function renderGantt(){
       leftRows+=`<div style="height:${RH}px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;padding:0 8px 0 16px" title="${t.nm}">
         <div class="av" style="width:22px;height:22px;font-size:8px;background:${AV_COLORS[t.ld[0]]||'#676879'};flex-shrink:0">${t.ld[0]||'?'}</div>
         <span style="font-size:12px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${t.nm}</span>
-        <button class="chip ${t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':'c-none'}" style="font-size:10px;height:18px;padding:0 7px;flex-shrink:0">${t.status||'—'}</button>
+        <button class="chip" style="${statusChipStyle(t.status)};font-size:10px;height:18px;padding:0 7px;flex-shrink:0">${escH(t.status)||'—'}</button>
       </div>`;
 
       let barHtml='';
@@ -1021,15 +1031,41 @@ function closePopup(){
   document.getElementById('popupOverlay').classList.remove('open');
   popupCleanup=null;
 }
+function statusChipStyle(st){
+  const col=STATUS_COLORS[st];
+  return col?`background:${col};color:#fff`:'background:var(--bg3);color:var(--tx2)';
+}
 function openStatusPopup(e,id){
-  const opts=[['Done','c-done','#00c875'],['In progress','c-prog','#fdab3d'],['Stuck','c-stuck','#e2445c'],['—','c-none','#c3c6d4']];
-  const html=opts.map(([lbl,cls,col])=>`<div class="popup-item" onclick="setStatus(${id},'${lbl==='—'?'':lbl}')"><div class="popup-dot" style="background:${col}"></div>${lbl}</div>`).join('');
-  openPopup(e,html);
+  const opts=Object.entries(STATUS_COLORS).map(([lbl,col])=>`<div class="popup-item" onclick="setStatus(${id},'${escH(lbl)}')"><div class="popup-dot" style="background:${col}"></div>${escH(lbl)}</div>`).join('');
+  const clear=`<div class="popup-item" onclick="setStatus(${id},'')"><div class="popup-dot" style="background:#c3c6d4"></div>—</div>`;
+  const add=`<div class="popup-item" onclick="addCustomStatus(${id})" style="border-top:1px solid var(--bd2);margin-top:4px;padding-top:6px;color:var(--acc)">+ Add status…</div>`;
+  openPopup(e,opts+clear+add);
+}
+function addCustomStatus(id){
+  closePopup();
+  showInputModal('New status','Status name…',name=>{
+    if(!name)return;
+    const palette=['#0075ff','#a25ddc','#ff642e','#03a9f4','#008060','#d83a52','#6c6cff','#ff158a'];
+    if(!STATUS_COLORS[name])STATUS_COLORS[name]=palette[Object.keys(STATUS_COLORS).length%palette.length];
+    setStatus(id,name);
+  });
 }
 function setStatus(id,val){
   const t=TASKS.find(x=>x.id===id);if(t){t.status=val;if(val==='Done')t.pri='Low';}
-  closePopup();renderView();
+  closePopup();saveLiveState();renderView();buildFilters();
   if(panelTaskId===id)openPanel(id);
+}
+function deleteTask(id){
+  const idx=TASKS.findIndex(x=>x.id===id);
+  if(idx===-1)return;
+  TASKS.splice(idx,1);
+  saveLiveState();closePanel();renderView();buildFilters();
+}
+function deleteGroup(stream){
+  if(!confirm(`Delete group "${stream}" and all its tasks?`))return;
+  TASKS=TASKS.filter(t=>t.st!==stream);
+  delete STREAMS[stream];
+  saveLiveState();renderView();buildFilters();
 }
 function openPriPopup(e,id){
   const opts=[['High','p-hi','#e2445c'],['Medium','p-med','#fdab3d'],['Low','p-lo','#00c875'],['—','p-none','#c3c6d4']];
@@ -1115,7 +1151,22 @@ function buildExportHtml(){
     .replace(/let TASKS=\[[\s\S]*?\];/,'let TASKS='+JSON.stringify(TASKS)+';')
     .replace(/let nextId=\d+/,'let nextId='+nextId)
     .replace(/const KNOWN_OWNERS=\[[\s\S]*?\];/,'const KNOWN_OWNERS='+JSON.stringify(KNOWN_OWNERS)+';')
-    .replace(/const AV_COLORS=\{[\s\S]*?\};/,'const AV_COLORS='+JSON.stringify(AV_COLORS)+';');
+    .replace(/const AV_COLORS=\{[\s\S]*?\};/,'const AV_COLORS='+JSON.stringify(AV_COLORS)+';')
+    .replace(/const STATUS_COLORS=\{[\s\S]*?\};/,'const STATUS_COLORS='+JSON.stringify(STATUS_COLORS)+';');
+}
+// Public version pushed to GitHub — resets to default tasks so personal data is NOT exposed
+function buildPublicHtml(){
+  const defStreams={"Planning":"#7b5ea7","Design":"#00c875","Development":"#579bfc","Testing":"#fdab3d","Launch":"#e2445c"};
+  const defTasks=[{id:1,st:"Planning",nm:"Project kickoff meeting",ld:["AL"],ef:"0.5d",tf:"1 day",s:"2026-04-10",e:"2026-04-10",status:"Done",pri:"High",comments:[]},{id:2,st:"Planning",nm:"Define project scope & requirements",ld:["AL","JM"],ef:"2d",tf:"3 days",s:"2026-04-11",e:"2026-04-14",status:"Done",pri:"High",comments:[]},{id:3,st:"Planning",nm:"Stakeholder alignment & sign-off",ld:["AL"],ef:"1d",tf:"2 days",s:"2026-04-14",e:"2026-04-15",status:"In progress",pri:"Medium",comments:[]},{id:4,st:"Design",nm:"Brand guidelines & style review",ld:["SR"],ef:"1d",tf:"2 days",s:"2026-04-15",e:"2026-04-16",status:"Done",pri:"Medium",comments:[]},{id:5,st:"Design",nm:"Landing page wireframes",ld:["SR"],ef:"2d",tf:"3 days",s:"2026-04-17",e:"2026-04-21",status:"In progress",pri:"High",comments:[]},{id:6,st:"Design",nm:"UI component design system",ld:["SR","JM"],ef:"3d",tf:"5 days",s:"2026-04-21",e:"2026-04-25",status:"",pri:"Medium",comments:[]},{id:7,st:"Design",nm:"Marketing assets (banners, social media)",ld:["SR"],ef:"2d",tf:"3 days",s:"2026-04-25",e:"2026-04-28",status:"",pri:"Low",comments:[]},{id:8,st:"Development",nm:"Set up repository & CI/CD pipeline",ld:["JM"],ef:"0.5d",tf:"1 day",s:"2026-04-15",e:"2026-04-15",status:"Done",pri:"High",comments:[]},{id:9,st:"Development",nm:"Build landing page (frontend)",ld:["JM"],ef:"4d",tf:"5 days",s:"2026-04-21",e:"2026-04-25",status:"In progress",pri:"High",comments:[]},{id:10,st:"Development",nm:"API integration & backend setup",ld:["JM","AL"],ef:"3d",tf:"4 days",s:"2026-04-25",e:"2026-04-29",status:"",pri:"High",comments:[]},{id:11,st:"Development",nm:"Email & notification system",ld:["JM"],ef:"2d",tf:"3 days",s:"2026-04-29",e:"2026-05-01",status:"",pri:"Medium",comments:[]},{id:12,st:"Development",nm:"Analytics & tracking setup",ld:["JM"],ef:"1d",tf:"2 days",s:"2026-05-01",e:"2026-05-02",status:"",pri:"Low",comments:[]},{id:13,st:"Testing",nm:"QA testing \u2013 functional flows",ld:["SR","AL"],ef:"2d",tf:"3 days",s:"2026-05-05",e:"2026-05-07",status:"",pri:"High",comments:[]},{id:14,st:"Testing",nm:"Cross-browser & device testing",ld:["SR"],ef:"1d",tf:"2 days",s:"2026-05-07",e:"2026-05-08",status:"",pri:"Medium",comments:[]},{id:15,st:"Testing",nm:"Performance & load testing",ld:["JM"],ef:"1d",tf:"1 day",s:"2026-05-08",e:"2026-05-08",status:"",pri:"Medium",comments:[]},{id:16,st:"Launch",nm:"Soft launch \u2013 beta users",ld:["AL"],ef:"1d",tf:"1 day",s:"2026-05-12",e:"2026-05-12",status:"",pri:"High",comments:[]},{id:17,st:"Launch",nm:"Public launch & announcement",ld:["AL","SR","JM"],ef:"0.5d",tf:"1 day",s:"2026-05-15",e:"2026-05-15",status:"",pri:"High",comments:[]}];
+  const defAV={"AL":"#a25ddc","JM":"#00c875","SR":"#fdab3d","TF":"#579bfc","MS":"#e2445c","PM":"#ff642e","CC":"#676879"};
+  const defStatus={"Done":"#00c875","In progress":"#fdab3d","Stuck":"#e2445c"};
+  return document.documentElement.outerHTML
+    .replace(/const STREAMS=\{[\s\S]*?\};/,'const STREAMS='+JSON.stringify(defStreams)+';')
+    .replace(/let TASKS=\[[\s\S]*?\];/,'let TASKS='+JSON.stringify(defTasks)+';')
+    .replace(/let nextId=\d+/,'let nextId=18')
+    .replace(/const KNOWN_OWNERS=\[[\s\S]*?\];/,'const KNOWN_OWNERS=["AL","JM","SR"];')
+    .replace(/const AV_COLORS=\{[\s\S]*?\};/,'const AV_COLORS='+JSON.stringify(defAV)+';')
+    .replace(/const STATUS_COLORS=\{[\s\S]*?\};/,'const STATUS_COLORS='+JSON.stringify(defStatus)+';');
 }
 // ── DARK MODE ──
 function toggleDarkMode(){
@@ -1188,7 +1239,8 @@ function saveCurrentBoard(forceName){
     STREAMS:JSON.parse(JSON.stringify(STREAMS)),
     TASKS:JSON.parse(JSON.stringify(TASKS)),
     KNOWN_OWNERS:[...KNOWN_OWNERS],
-    AV_COLORS:{...AV_COLORS}});
+    AV_COLORS:{...AV_COLORS},
+    STATUS_COLORS:{...STATUS_COLORS}});
   localStorage.setItem(SNAP_KEY,JSON.stringify(snaps));
   if(nameEl&&!forceName)nameEl.value='';
   renderBoardsList();
@@ -1204,6 +1256,7 @@ function loadSnapshot(id){
   nextId=snap.nextId||TASKS.length+1;
   if(snap.KNOWN_OWNERS){KNOWN_OWNERS.length=0;KNOWN_OWNERS.push(...snap.KNOWN_OWNERS);}
   if(snap.AV_COLORS){Object.keys(AV_COLORS).forEach(k=>delete AV_COLORS[k]);Object.assign(AV_COLORS,snap.AV_COLORS);}
+  if(snap.STATUS_COLORS){Object.keys(STATUS_COLORS).forEach(k=>delete STATUS_COLORS[k]);Object.assign(STATUS_COLORS,snap.STATUS_COLORS);}
   collapsed={};
   saveLiveState();
   closePanel();
@@ -1220,7 +1273,8 @@ function updateSnapshot(id){
     STREAMS:JSON.parse(JSON.stringify(STREAMS)),
     TASKS:JSON.parse(JSON.stringify(TASKS)),
     KNOWN_OWNERS:[...KNOWN_OWNERS],
-    AV_COLORS:{...AV_COLORS}};
+    AV_COLORS:{...AV_COLORS},
+    STATUS_COLORS:{...STATUS_COLORS}};
   localStorage.setItem(SNAP_KEY,JSON.stringify(snaps));
   renderBoardsList();
 }
@@ -1368,8 +1422,8 @@ async function doGhSave(s){
     }
     if(!metaRes.ok)throw new Error('GET '+metaRes.status);
     const meta=await metaRes.json();
-    // UTF-8-safe base64
-    const html=buildExportHtml();
+    // Push with default data — personal board lives only in localStorage/snapshots
+    const html=buildPublicHtml();
     const b64=btoa(unescape(encodeURIComponent(html)));
     const putRes=await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${s.file}`,{
       method:'PUT',
@@ -1430,7 +1484,7 @@ function openPanel(id){
 }
 
 function buildPanelBody(t,col){
-  const sCls=t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':t.status==='Stuck'?'c-stuck':'c-none';
+  const sStyle=statusChipStyle(t.status);
   const pCls=PRIORITIES[t.pri||'']||'p-none';
   const ownHtml=t.ld.map(l=>`<div class="av" style="background:${AV_COLORS[l]||'#676879'}" title="Click to remove ${escH(l)}" onclick="panelRemoveOwner(${t.id},'${l}')">${escH(l)}</div>`).join('')
     +`<button class="sp-av-add" onclick="panelAddOwner(${t.id})" title="Add owner">+</button>`;
@@ -1452,7 +1506,7 @@ function buildPanelBody(t,col){
 <div class="sp-section sp-row">
   <div class="sp-col">
     <div class="sp-label">Status</div>
-    <button class="chip ${sCls}" onclick="openStatusPopup(event,${t.id})">${t.status||'&mdash;'}</button>
+    <button class="chip" style="${sStyle}" onclick="openStatusPopup(event,${t.id})">${escH(t.status)||'&mdash;'}</button>
   </div>
   <div class="sp-col">
     <div class="sp-label">Priority</div>
@@ -1494,6 +1548,12 @@ function buildPanelBody(t,col){
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();panelAddComment(${t.id})}"></textarea>
     <button class="comment-send" onclick="panelAddComment(${t.id})">Send</button>
   </div>
+</div>
+<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--bd)">
+  <button onclick="deleteTask(${t.id})" style="display:flex;align-items:center;gap:6px;padding:0 12px;height:30px;border:1px solid #e2445c;border-radius:var(--r);background:transparent;color:#e2445c;font-size:12px;cursor:pointer">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><polyline points="2 4 4 4 14 4"></polyline><path d="M5 4V2h6v2M6 7v5M10 7v5"></path><path d="M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"></path></svg>
+    Delete task
+  </button>
 </div>`;
 }
 
