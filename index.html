@@ -1056,6 +1056,7 @@
             </button>
             <span id="saveStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3)">Saving…</span>
             <span id="syncStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3); display: none"></span>
+            <span id="syncLastUpdated" style="font-size: 10px; white-space: nowrap; color: var(--tx3); display: none"></span>
             <div class="spacer"></div>
             <button class="tb-btn">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -3765,8 +3766,8 @@
 
         <script>
             // ── VERSION ──
-            const APP_VERSION = '1.1';
-            const APP_UPDATED = '100426 000800'; // DDMMYY HHMMSS
+            const APP_VERSION = '1.2';
+            const APP_UPDATED = '100426 001500'; // DDMMYY HHMMSS
             document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById('appVersion');
                 if (el) el.textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
@@ -6076,10 +6077,9 @@
                     }
                     shareCode = code;
                     shareRemoteUpdatedAt = insertedAt;
-                    shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareCode", shareCode);
                     localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt);
-                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    updateSyncTimestamp();
                     startSharePolling();
                     renderShareModal();
                     setShareStatus(
@@ -6111,8 +6111,7 @@
                     }
                     shareRemoteUpdatedAt = ts;
                     localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt);
-                    shareUpdatedAt = new Date().toLocaleString();
-                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    updateSyncTimestamp();
                     if (!silent) { renderShareModal(); setShareStatus("Board updated successfully.", "#00c875"); }
                 } catch(e) {
                     if (!silent) setShareStatus("Error: " + e.message, "#e2445c");
@@ -6134,8 +6133,7 @@
                     loadBoardSnapshot(meta.data);
                     shareRemoteUpdatedAt = meta.updated_at;
                     localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt);
-                    shareUpdatedAt = new Date().toLocaleString();
-                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    updateSyncTimestamp();
                     if (document.getElementById("shareModal").style.display !== "none") renderShareModal();
                     if (!silent) setShareStatus("Board refreshed from shared code.", "#00c875");
                 } catch(e) {
@@ -6145,6 +6143,25 @@
 
             // Poll for updates every 60s while a share code is active
             let _sharePollTimer = null;
+            function fmtSyncTime(d) {
+                d = d || new Date();
+                const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+            }
+            function updateSyncTimestamp() {
+                shareUpdatedAt = fmtSyncTime();
+                localStorage.setItem('fridayShareUpdatedAt', shareUpdatedAt);
+                const el = document.getElementById('syncLastUpdated');
+                if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = ''; }
+                const modal = document.getElementById('shareLastSynced');
+                if (modal) modal.textContent = 'Last synced: ' + shareUpdatedAt;
+            }
+            // Restore topbar timestamp on load
+            (function(){ if (shareCode && shareUpdatedAt) {
+                const el = document.getElementById('syncLastUpdated');
+                if (el) { el.textContent = 'Synced ' + shareUpdatedAt; el.style.display = ''; }
+            }})();
+
             function setSyncStatus(msg, color) {
                 const el = document.getElementById('syncStatus');
                 if (!el) return;
@@ -6216,10 +6233,9 @@
                     loadBoardSnapshot(data.data);
                     shareCode = code;
                     shareRemoteUpdatedAt = data.updated_at || null;
-                    shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareCode", shareCode);
                     localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt || '');
-                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    updateSyncTimestamp();
                     startSharePolling();
                     closeShareModal();
                 } catch(e) {
