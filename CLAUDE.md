@@ -11,6 +11,7 @@ Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything liv
 - All state lives in plain JS globals (`TASKS`, `STREAMS`, `KNOWN_OWNERS`, `AV_COLORS`, `STATUS_COLORS`, `nextId`)
 - `localStorage` key: `fridayBoardState` — serialized on every mutation via `saveLiveState()`
 - Theme preference key: `fridayTheme` — `'dark'` or `'light'`
+- Supabase JS loaded via CDN (`@supabase/supabase-js@2`) in `<head>`
 
 ## Key globals
 
@@ -26,6 +27,8 @@ Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything liv
 | `collapsed` | `{ groupName: bool }` — collapsed state |
 | `panelTaskId` | Currently open side panel task id (or null) |
 | `dragTaskId` | Task id being dragged (or null) |
+| `shareCode` | Active Supabase share code (or null); persisted in `localStorage` → `fridayShareCode` |
+| `shareUpdatedAt` | Human-readable timestamp of last push; persisted in `localStorage` → `fridayShareUpdatedAt` |
 
 ## Task object shape
 
@@ -34,7 +37,7 @@ Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything liv
   id: Number,
   st: String,        // group name (stream)
   nm: String,        // task name
-  ld: [String],      // owner initials array
+  ld: [String],      // owner initials array (up to 4 chars each)
   ef: String,        // effort (e.g. "2d")
   tf: String,        // timeframe (e.g. "1 week")
   s: String,         // start date "YYYY-MM-DD"
@@ -78,9 +81,34 @@ Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything liv
 - Adding a new person via "+ New person…" also assigns them to the task immediately
 - `AV_COLORS` maps initials → hex color; persisted in localStorage and snapshots
 
+### Share system (Supabase)
+- `SUPABASE_URL` / `SUPABASE_ANON_KEY` — constants at top of script; anon key is safe to be public
+- `getSb()` — lazy-initialises the Supabase client; returns null if URL is still placeholder
+- `generateShareCode()` — creates a random 6-char code, inserts board snapshot into `boards` table
+- `pushSharedBoard()` — upserts current board state to existing code
+- `joinBoard()` — fetches by code, calls `loadBoardSnapshot()`
+- `stopSharing()` — clears local `shareCode` / `shareUpdatedAt` from localStorage
+- `boardSnapshot()` — returns `{ TASKS, STREAMS, KNOWN_OWNERS, AV_COLORS, STATUS_COLORS, nextId }`
+- `loadBoardSnapshot(d)` — replaces all live globals from a snapshot object, then saves + re-renders
+- All async share functions wrapped in try/catch — errors shown in modal status line, never silent
+
+**Supabase table schema:**
+```sql
+create table boards (
+  code text primary key,
+  data jsonb not null,
+  updated_at timestamptz default now()
+);
+alter table boards enable row level security;
+create policy "public read"   on boards for select using (true);
+create policy "public insert" on boards for insert with check (true);
+create policy "public update" on boards for update using (true);
+```
+
 ### GitHub Save vs Export HTML
 - **`buildExportHtml()`** — bakes current TASKS/STREAMS/owners/statuses into the HTML (used by Export HTML button)
 - **`buildPublicHtml()`** — bakes DEFAULT Product Launch data into the HTML (used by Save to GitHub button)
+- Neither replaces `SUPABASE_URL` / `SUPABASE_ANON_KEY` — credentials are preserved in both exports
 - This separation means the public GitHub Pages URL never exposes personal board data
 
 ### GitHub Snapshots
