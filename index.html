@@ -626,13 +626,17 @@ const LIVE_KEY='fridayBoardState';
     Object.keys(STREAMS).forEach(k=>delete STREAMS[k]);
     Object.assign(STREAMS,d.STREAMS||{});
     nextId=d.nextId||1;
-    // Restore owners — replace, not merge, so owners stay board-specific
-    if(d.KNOWN_OWNERS){KNOWN_OWNERS.length=0;KNOWN_OWNERS.push(...d.KNOWN_OWNERS);}
     if(d.AV_COLORS){Object.keys(AV_COLORS).forEach(k=>delete AV_COLORS[k]);Object.assign(AV_COLORS,d.AV_COLORS);}
   }catch(e){}
 })();
+// Derive KNOWN_OWNERS from tasks actually on this board (clears stale cross-board accumulation)
+(function(){
+  const used=[...new Set(TASKS.flatMap(t=>t.ld||[]))];
+  KNOWN_OWNERS.length=0;
+  KNOWN_OWNERS.push(...used);
+})();
 function saveLiveState(){
-  try{localStorage.setItem(LIVE_KEY,JSON.stringify({TASKS:JSON.parse(JSON.stringify(TASKS)),STREAMS:JSON.parse(JSON.stringify(STREAMS)),nextId,KNOWN_OWNERS:[...KNOWN_OWNERS],AV_COLORS:{...AV_COLORS}}));}catch(e){}
+  try{localStorage.setItem(LIVE_KEY,JSON.stringify({TASKS:JSON.parse(JSON.stringify(TASKS)),STREAMS:JSON.parse(JSON.stringify(STREAMS)),nextId,AV_COLORS:{...AV_COLORS}}));}catch(e){}
 }
 
 TASKS.forEach(t=>{if(!t.comments)t.comments=[];});
