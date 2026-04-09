@@ -803,6 +803,7 @@ function updateField(id,field,val){const t=TASKS.find(x=>x.id===id);if(t)t[field
 function addTask(stream){
   showInputModal(`Add task to "${stream}"`, 'Task name…', nm=>{
     TASKS.push({id:nextId++,st:stream,nm,ld:['TF'],ef:'',tf:'',s:'',e:'',status:'',pri:'',comments:[]});
+    saveLiveState();
     renderView();
   });
 }
@@ -810,6 +811,7 @@ function openAddGroup(){
   showInputModal('New group', 'Group name…', nm=>{
     const cols=['#7b5ea7','#00c875','#579bfc','#fdab3d','#e2445c','#ff642e'];
     STREAMS[nm]=cols[Object.keys(STREAMS).length%cols.length];
+    saveLiveState();
     buildFilters();renderView();
   });
 }
@@ -827,8 +829,9 @@ function showInputModal(title,placeholder,cb){
 function confirmInputModal(){
   const val=document.getElementById('inputModalInp').value.trim();
   if(!val)return;
+  const cb=_inputModalCb;
   closeInputModal();
-  _inputModalCb&&_inputModalCb(val);
+  cb&&cb(val);
 }
 function closeInputModal(){document.getElementById('inputModal').style.display='none';_inputModalCb=null;}
 
