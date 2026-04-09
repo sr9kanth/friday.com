@@ -978,11 +978,11 @@
         <link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css">
         <link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css">
         <link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css">
-    <link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"></head>
+    <link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"><link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"></head>
     <body class="force-dark">
         <div class="topbar">
             <span class="board-title">Friday.com</span>
-            <span style="font-size:10px;color:var(--tx3);white-space:nowrap;font-weight:400;margin-left:2px" id="appVersion"></span>
+            <span style="font-size:10px;color:var(--tx3);white-space:nowrap;font-weight:400;margin-left:2px" id="appVersion">v1.3 · 100426 002000</span>
             <div class="tb-sep"></div>
             <button class="tb-btn" onclick="exportHtml()">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1048,8 +1048,8 @@
                 </svg>
             </button>
             <span id="saveStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3)">Saving…</span>
-            <span id="syncStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3); display: none"></span>
-            <span id="syncLastUpdated" style="font-size: 10px; white-space: nowrap; color: var(--tx3); display: none"></span>
+            <span id="syncStatus" style="font-size: 11px; white-space: nowrap; color: var(--acc);">⟳ Live sync on</span>
+            <span id="syncLastUpdated" style="font-size: 10px; white-space: nowrap; color: var(--tx3);">Synced 10 April 2026, 00:21:48</span>
             <div class="spacer"></div>
             <button class="tb-btn pri" onclick="openAddGroup()">
                 + New group
@@ -1082,8 +1082,8 @@
                     </svg>
                     Filter
                 </button>
-                <select class="flt" id="streamFil" onchange="renderView()"><option value="all">All groups</option><option value="LRS R3">LRS R3</option><option value="MFR">MFR</option><option value="LRS R4">LRS R4</option><option value="Backlog">Backlog</option></select>
-                <select class="flt" id="statusFil" onchange="renderView()"><option value="all">All statuses</option><option value="Done">Done</option><option value="In progress">In progress</option><option value="Stuck">Stuck</option><option value="">No status</option></select>
+                <select class="flt" id="streamFil" onchange="renderView()"><option value="all">All groups</option><option value="MFR">MFR</option><option value="LRS R3">LRS R3</option><option value="LRS R4">LRS R4</option><option value="Backlog">Backlog</option></select>
+                <select class="flt" id="statusFil" onchange="renderView()"><option value="all">All statuses</option><option value="Done">Done</option><option value="Stuck">Stuck</option><option value="Design">Design</option><option value="In progress">In progress</option><option value="">No status</option></select>
                 <select class="flt" id="leadFil" onchange="renderView()"><option value="all">All owners</option><option value="SRI">SRI</option></select>
             </div>
             <button class="add-main" onclick="openAddTask()">+ Add task</button>
@@ -1110,37 +1110,7 @@
                             "><div style="position:relative;width:1067.5px;display:flex;border-bottom:1px solid var(--bd);overflow:hidden"><div style="width:108.5px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Mar</div><div style="width:105px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Apr</div><div style="width:108.5px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">May</div><div style="width:105px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Jun</div><div style="width:108.5px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Jul</div><div style="width:108.5px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Aug</div><div style="width:105px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Sept</div><div style="width:108.5px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Oct</div><div style="width:105px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Nov</div><div style="width:105px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">Dec</div></div></th>
                     </tr>
                 </thead>
-                <tbody id="boardBody"><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(123, 94, 167);"><div class="grp-label">
-      <button class="grp-toggle open" onclick="toggleGroup('LRS R3')">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"></path></svg>
-      </button>
-      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:#7b5ea7">LRS R3</span>
-      <span class="grp-count">3 items</span>
-      <button onclick="deleteGroup('LRS R3')" title="Delete group" style="margin-left:6px;opacity:0;padding:0 5px;height:20px;border:none;border-radius:4px;background:transparent;color:#e2445c;font-size:11px;cursor:pointer;flex-shrink:0" class="grp-del">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><polyline points="2 4 4 4 14 4"></polyline><path d="M5 4V2h6v2M6 7v5M10 7v5"></path><path d="M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"></path></svg>
-      </button>
-    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"><div style="flex: 1 1 0%; background: rgb(253, 171, 61);"></div><div style="flex: 2 1 0%; background: var(--bg3); border-radius: 0px 4px 4px 0px;"></div></div></td></tr><tr class="task-row" data-id="1" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#7b5ea7"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(1,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="1" onblur="updateField(1,'nm',this.textContent.trim())">Refusal DocGen Letters</span>
-        </div>
-      </div></td><td><div class="av-wrap"><div class="av" title="SRI" style="background: rgb(0, 128, 96);">SRI</div></div></td><td><button class="chip" style="background:#fdab3d;color:#fff" onclick="openStatusPopup(event,1)">In progress</button></td><td><button class="pri-chip p-med" onclick="openPriPopup(event,1)">Medium</button></td><td><span class="date-cell overdue">06/04/26</span></td><td><span class="date-cell">15/04/26</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(1,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(1,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><div class="tl-bg" style="width: 1067.5px;"><div class="tl-today" style="left: 136.5px;"></div><div class="tl-bar" title="06/04/26 → 15/04/26" style="left: 126px; width: 35px; background: rgb(123, 94, 167); position: absolute;"></div></div></td></tr><tr class="task-row" data-id="2" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#7b5ea7"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(2,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="2" onblur="updateField(2,'nm',this.textContent.trim())">Applicant tracking​</span>
-        </div>
-      </div></td><td><div class="av-wrap"><div class="av" title="SRI" style="background: rgb(0, 128, 96);">SRI</div></div></td><td><button class="chip" style="background:var(--bg3);color:var(--tx2)" onclick="openStatusPopup(event,2)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,2)">—</button></td><td><span class="date-cell">13/04/26</span></td><td><span class="date-cell">17/04/26</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(2,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(2,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><div class="tl-bg" style="width: 1067.5px;"><div class="tl-today" style="left: 136.5px;"></div><div class="tl-bar" title="13/04/26 → 17/04/26" style="left: 150.5px; width: 17.5px; background: rgb(123, 94, 167); position: absolute;"></div></div></td></tr><tr class="task-row" data-id="3" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#7b5ea7"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(3,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="3" onblur="updateField(3,'nm',this.textContent.trim())">LRS/Janison​ Integration</span>
-        </div>
-      </div></td><td><div class="av-wrap"><div class="av" title="SRI" style="background: rgb(0, 128, 96);">SRI</div></div></td><td><button class="chip" style="background:var(--bg3);color:var(--tx2)" onclick="openStatusPopup(event,3)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,3)">—</button></td><td><span class="date-cell overdue">06/04/26</span></td><td><span class="date-cell">30/04/26</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(3,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(3,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><div class="tl-bg" style="width: 1067.5px;"><div class="tl-today" style="left: 136.5px;"></div><div class="tl-bar" title="06/04/26 → 30/04/26" style="left: 126px; width: 87.5px; background: rgb(123, 94, 167); position: absolute;"></div></div></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('LRS R3')">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
-      Add task
-    </button></td></tr><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(0, 200, 117);"><div class="grp-label">
+                <tbody id="boardBody"><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(0, 200, 117);"><div class="grp-label">
       <button class="grp-toggle open" onclick="toggleGroup('MFR')">
         <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"></path></svg>
       </button>
@@ -1156,6 +1126,36 @@
           <span class="rn-text" contenteditable="true" spellcheck="false" data-id="4" onblur="updateField(4,'nm',this.textContent.trim())">Scoping</span>
         </div>
       </div></td><td><div class="av-wrap"><div class="av" title="SRI" style="background: rgb(0, 128, 96);">SRI</div></div></td><td><button class="chip" style="background:var(--bg3);color:var(--tx2)" onclick="openStatusPopup(event,4)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,4)">—</button></td><td><span class="date-cell">—</span></td><td><span class="date-cell">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(4,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(4,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><span class="tl-empty">No dates set</span></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('MFR')">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
+      Add task
+    </button></td></tr><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(123, 94, 167);"><div class="grp-label">
+      <button class="grp-toggle open" onclick="toggleGroup('LRS R3')">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"></path></svg>
+      </button>
+      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:#7b5ea7">LRS R3</span>
+      <span class="grp-count">3 items</span>
+      <button onclick="deleteGroup('LRS R3')" title="Delete group" style="margin-left:6px;opacity:0;padding:0 5px;height:20px;border:none;border-radius:4px;background:transparent;color:#e2445c;font-size:11px;cursor:pointer;flex-shrink:0" class="grp-del">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><polyline points="2 4 4 4 14 4"></polyline><path d="M5 4V2h6v2M6 7v5M10 7v5"></path><path d="M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"></path></svg>
+      </button>
+    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"><div style="flex: 2 1 0%; background: rgb(253, 171, 61);"></div><div style="flex: 1 1 0%; background: var(--bg3); border-radius: 0px 4px 4px 0px;"></div></div></td></tr><tr class="task-row" data-id="1" draggable="true"><td class="name-td"><div class="name-inner">
+        <div class="row-stripe" style="background:#7b5ea7"></div>
+        <div class="row-check"><input type="checkbox" onchange="toggleDone(1,this)"></div>
+        <div class="row-name">
+          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="1" onblur="updateField(1,'nm',this.textContent.trim())">Refusal DocGen Letters</span>
+        </div>
+      </div></td><td><div class="av-wrap"><div class="av" title="SRI" style="background: rgb(0, 128, 96);">SRI</div></div></td><td><button class="chip" style="background:#fdab3d;color:#fff" onclick="openStatusPopup(event,1)">In progress</button></td><td><button class="pri-chip p-med" onclick="openPriPopup(event,1)">Medium</button></td><td><span class="date-cell overdue">06/04/26</span></td><td><span class="date-cell">15/04/26</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(1,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(1,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><div class="tl-bg" style="width: 1067.5px;"><div class="tl-today" style="left: 136.5px;"></div><div class="tl-bar" title="06/04/26 → 15/04/26" style="left: 126px; width: 35px; background: rgb(123, 94, 167); position: absolute;"></div></div></td></tr><tr class="task-row" data-id="2" draggable="true"><td class="name-td"><div class="name-inner">
+        <div class="row-stripe" style="background:#7b5ea7"></div>
+        <div class="row-check"><input type="checkbox" onchange="toggleDone(2,this)"></div>
+        <div class="row-name">
+          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="2" onblur="updateField(2,'nm',this.textContent.trim())">Applicant tracking​</span>
+        </div>
+      </div></td><td><div class="av-wrap"><div class="av" title="SRI" style="background: rgb(0, 128, 96);">SRI</div></div></td><td><button class="chip" style="background:#03a9f4;color:#fff" onclick="openStatusPopup(event,2)">Design</button></td><td><button class="pri-chip p-lo" onclick="openPriPopup(event,2)">Low</button></td><td><span class="date-cell">13/04/26</span></td><td><span class="date-cell">17/04/26</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(2,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(2,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><div class="tl-bg" style="width: 1067.5px;"><div class="tl-today" style="left: 136.5px;"></div><div class="tl-bar" title="13/04/26 → 17/04/26" style="left: 150.5px; width: 17.5px; background: rgb(123, 94, 167); position: absolute;"></div></div></td></tr><tr class="task-row" data-id="3" draggable="true"><td class="name-td"><div class="name-inner">
+        <div class="row-stripe" style="background:#7b5ea7"></div>
+        <div class="row-check"><input type="checkbox" onchange="toggleDone(3,this)"></div>
+        <div class="row-name">
+          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="3" onblur="updateField(3,'nm',this.textContent.trim())">LRS/Janison​ Integration</span>
+        </div>
+      </div></td><td><div class="av-wrap"><div class="av" title="SRI" style="background: rgb(0, 128, 96);">SRI</div></div></td><td><button class="chip" style="background:#fdab3d;color:#fff" onclick="openStatusPopup(event,3)">In progress</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,3)">—</button></td><td><span class="date-cell overdue">06/04/26</span></td><td><span class="date-cell">30/04/26</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(3,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(3,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><div class="tl-bg" style="width: 1067.5px;"><div class="tl-today" style="left: 136.5px;"></div><div class="tl-bar" title="06/04/26 → 30/04/26" style="left: 126px; width: 87.5px; background: rgb(123, 94, 167); position: absolute;"></div></div></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('LRS R3')">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
       Add task
     </button></td></tr><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(87, 155, 252);"><div class="grp-label">
@@ -2721,15 +2721,7 @@
         </div>
 
         <!-- GitHub settings modal -->
-        <div id="ghModal" style="
-                display: none;
-                position: fixed;
-                inset: 0;
-                z-index: 600;
-                background: rgba(0, 0, 0, 0.45);
-                align-items: center;
-                justify-content: center;
-            ">
+        <div id="ghModal" style="display: none; position: fixed; inset: 0px; z-index: 600; background: rgba(0, 0, 0, 0.45); align-items: center; justify-content: center;">
             <div style="
                     background: var(--bg);
                     border-radius: var(--r);
@@ -6262,4 +6254,4 @@
     
     <dubble-extension id="__dubble0394030940.68648916544148441775738727076"></dubble-extension>
 
-<plasmo-csui id="magic-how-recording"></plasmo-csui></body><dubble-extension id="__dubble0394030940.107090457080569861775741857368"></dubble-extension></html>
+<plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.107090457080569861775741857368"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui></body><dubble-extension id="__dubble0394030940.13116625245446191775744594189"></dubble-extension></html>
