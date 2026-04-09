@@ -1,7 +1,7 @@
 <html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Content development plan</title>
+<title>Friday.com</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -18,6 +18,18 @@
   --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.14);
   --acc:#579bfc;--acc2:#1e2d5a;
 }}
+body.force-dark{
+  --bg:#1c1f3b;--bg2:#262945;--bg3:#303455;
+  --tx:#d5d8ef;--tx2:#8b8fb5;--tx3:#5c6080;
+  --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.14);
+  --acc:#579bfc;--acc2:#1e2d5a;
+}
+body.force-light{
+  --bg:#fff;--bg2:#f6f7fb;--bg3:#eef0f7;
+  --tx:#323338;--tx2:#676879;--tx3:#9699a6;
+  --bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);
+  --acc:#0073ea;--acc2:#e8f0fd;
+}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:13px}
 body{display:flex;flex-direction:column}
 
@@ -199,7 +211,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 <body>
 
 <div class="topbar">
-  <span class="board-title">Content development plan</span>
+  <span class="board-title">Friday.com</span>
   <div class="tb-sep"></div>
   <button class="tb-btn">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg>
@@ -232,8 +244,11 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
     <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
     Save
   </button>
+  <button class="tb-btn" id="darkToggleBtn" onclick="toggleDarkMode()" title="Toggle dark mode" style="padding:0 7px">
+    <svg id="darkToggleIcon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M13.5 10.5A6 6 0 017 3a.5.5 0 00-.6-.6A7 7 0 1014.1 11a.5.5 0 00-.6-.5z"></path></svg>
+  </button>
   <button class="tb-btn" onclick="openGhModal()" title="GitHub settings" style="padding:0 7px">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="2.5"></circle><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"></path></svg>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="2.5"></circle><path d="M8 2.5v-1M8 14.5v-1M2.5 8h-1M14.5 8h-1M4.1 4.1l-.7-.7M12.6 12.6l-.7-.7M4.1 11.9l-.7.7M12.6 3.4l-.7.7M5.5 8a2.5 2.5 0 105 0 2.5 2.5 0 00-5 0z"></path></svg>
   </button>
   <span id="saveStatus" style="font-size:11px;color:var(--tx3);white-space:nowrap"></span>
   <div class="spacer"></div>
@@ -758,7 +773,7 @@ function updateField(id,field,val){const t=TASKS.find(x=>x.id===id);if(t)t[field
 
 function addTask(stream){
   showInputModal(`Add task to "${stream}"`, 'Task name…', nm=>{
-    TASKS.push({id:nextId++,st:stream,nm,ld:['TF'],ef:'',tf:'',s:'',e:'',status:'',pri:'',comments:[]});
+    TASKS.push({id:nextId++,st:stream,nm,ld:[],ef:'',tf:'',s:'',e:'',status:'',pri:'',comments:[]});
     saveLiveState();
     renderView();
   });
@@ -822,6 +837,30 @@ function buildExportHtml(){
     .replace(/const KNOWN_OWNERS=\[[\s\S]*?\];/,'const KNOWN_OWNERS='+JSON.stringify(KNOWN_OWNERS)+';')
     .replace(/const AV_COLORS=\{[\s\S]*?\};/,'const AV_COLORS='+JSON.stringify(AV_COLORS)+';');
 }
+// ── DARK MODE ──
+function toggleDarkMode(){
+  const body=document.body;
+  const isDark=body.classList.contains('force-dark')||(window.matchMedia('(prefers-color-scheme:dark)').matches&&!body.classList.contains('force-light'));
+  if(isDark){body.classList.remove('force-dark');body.classList.add('force-light');localStorage.setItem('fridayTheme','light');}
+  else{body.classList.remove('force-light');body.classList.add('force-dark');localStorage.setItem('fridayTheme','dark');}
+  updateDarkToggleIcon();
+}
+function updateDarkToggleIcon(){
+  const body=document.body;
+  const isDark=body.classList.contains('force-dark')||(window.matchMedia('(prefers-color-scheme:dark)').matches&&!body.classList.contains('force-light'));
+  const icon=document.getElementById('darkToggleIcon');
+  if(!icon)return;
+  // sun icon when dark (clicking will go light), moon icon when light (clicking will go dark)
+  icon.innerHTML=isDark
+    ?'<circle cx="8" cy="8" r="3"></circle><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"></path>'
+    :'<path d="M13.5 10.5A6 6 0 017 3a.5.5 0 00-.6-.6A7 7 0 1014.1 11a.5.5 0 00-.6-.5z"></path>';
+}
+(function(){
+  const t=localStorage.getItem('fridayTheme');
+  if(t==='dark')document.body.classList.add('force-dark');
+  else if(t==='light')document.body.classList.add('force-light');
+  updateDarkToggleIcon();
+})();
 function exportHtml(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([buildExportHtml()],{type:'text/html'}));
