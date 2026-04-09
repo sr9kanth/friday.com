@@ -3765,8 +3765,8 @@
 
         <script>
             // ── VERSION ──
-            const APP_VERSION = '1.0';
-            const APP_UPDATED = '090426 235730'; // DDMMYY HHMMSS
+            const APP_VERSION = '1.1';
+            const APP_UPDATED = '100426 000800'; // DDMMYY HHMMSS
             document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById('appVersion');
                 if (el) el.textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
@@ -4101,6 +4101,14 @@
                         }),
                     );
                 } catch (e) {}
+                scheduleAutoPush();
+            }
+
+            let _autoPushTimer = null;
+            function scheduleAutoPush() {
+                if (!shareCode || !getSb()) return;
+                clearTimeout(_autoPushTimer);
+                _autoPushTimer = setTimeout(() => pushSharedBoard(true), 3000);
             }
 
             TASKS.forEach((t) => {
@@ -6083,14 +6091,14 @@
                 }
             }
 
-            async function pushSharedBoard() {
+            async function pushSharedBoard(silent) {
                 if (!shareCode) return;
                 const sb = getSb();
                 if (!sb) {
-                    setShareStatus("Supabase not configured.", "#e2445c");
+                    if (!silent) setShareStatus("Supabase not configured.", "#e2445c");
                     return;
                 }
-                setShareStatus("Pushing update…");
+                if (!silent) setShareStatus("Pushing update…");
                 try {
                     const data = boardSnapshot();
                     const ts = new Date().toISOString();
@@ -6098,17 +6106,16 @@
                         .from("boards")
                         .upsert({ code: shareCode, data, updated_at: ts });
                     if (error) {
-                        setShareStatus("Error: " + error.message, "#e2445c");
+                        if (!silent) setShareStatus("Error: " + error.message, "#e2445c");
                         return;
                     }
                     shareRemoteUpdatedAt = ts;
                     localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt);
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
-                    renderShareModal();
-                    setShareStatus("Board updated successfully.", "#00c875");
+                    if (!silent) { renderShareModal(); setShareStatus("Board updated successfully.", "#00c875"); }
                 } catch(e) {
-                    setShareStatus("Error: " + e.message, "#e2445c");
+                    if (!silent) setShareStatus("Error: " + e.message, "#e2445c");
                 }
             }
 
@@ -6121,7 +6128,7 @@
                     // Fetch timestamp first — only load full data if remote is newer
                     const { data: meta, error: metaErr } = await sb.from("boards").select("updated_at, data").eq("code", shareCode).single();
                     if (metaErr || !meta) { if (!silent) setShareStatus("Could not fetch board — code may no longer exist.", "#e2445c"); return; }
-                    if (silent && shareRemoteUpdatedAt && meta.updated_at <= shareRemoteUpdatedAt) {
+                    if (silent && shareRemoteUpdatedAt && new Date(meta.updated_at) <= new Date(shareRemoteUpdatedAt)) {
                         return; // Remote hasn't changed — don't overwrite local edits
                     }
                     loadBoardSnapshot(meta.data);
