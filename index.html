@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content development plan</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f6f7fb;--bg3:#eef0f7;
+  --tx:#323338;--tx2:#676879;--tx3:#9699a6;
+  --bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);
+  --acc:#0073ea;--acc2:#e8f0fd;
+  --r:8px;--rh:36px;
+  --col-w:240px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1f3b;--bg2:#262945;--bg3:#303455;
+  --tx:#d5d8ef;--tx2:#8b8fb5;--tx3:#5c6080;
+  --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.14);
+  --acc:#579bfc;--acc2:#1e2d5a;
+}}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:13px}
+body{display:flex;flex-direction:column}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:center;gap:6px;padding:0 16px;height:44px;background:var(--bg);border-bottom:1px solid var(--bd2);flex-shrink:0;z-index:50}
+.board-title{font-size:18px;font-weight:700;color:var(--tx)}
+.tb-sep{width:1px;height:18px;background:var(--bd2);margin:0 4px}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:0 10px;height:28px;border-radius:var(--r);border:none;background:transparent;color:var(--tx2);font-size:12px;cursor:pointer;white-space:nowrap}
+.tb-btn:hover{background:var(--bg3)}
+.tb-btn.pri{background:var(--acc);color:#fff;font-weight:500}
+.tb-btn.pri:hover{filter:brightness(1.08)}
+.tb-btn svg{width:14px;height:14px;flex-shrink:0}
+.spacer{flex:1}
+
+/* ── SUB BAR ── */
+.subbar{display:flex;align-items:center;gap:4px;padding:6px 16px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap}
+.view-tabs{display:flex;gap:0;border-radius:var(--r);overflow:hidden;border:1px solid var(--bd2)}
+.vt{padding:0 12px;height:28px;border:none;background:var(--bg);color:var(--tx2);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.vt.on{background:var(--acc2);color:var(--acc);font-weight:500}
+.vt:not(:last-child){border-right:1px solid var(--bd2)}
+.filter-bar{display:flex;gap:4px;margin-left:8px}
+.flt{padding:0 10px;height:28px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx2);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.flt:hover{background:var(--bg3)}
+select.flt{appearance:none}
+.add-main{margin-left:auto;background:var(--acc);color:#fff;padding:0 14px;height:32px;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px}
+.add-main:hover{filter:brightness(1.08)}
+
+/* ── MAIN GRID ── */
+.grid-wrap{flex:1;overflow:auto}
+
+/* Table */
+.board-table{border-collapse:collapse;width:100%;min-width:900px}
+.board-table th{position:sticky;top:0;z-index:30;background:var(--bg2);font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;height:36px;border-bottom:2px solid var(--bd2);border-right:1px solid var(--bd);padding:0 12px;white-space:nowrap;text-align:left}
+.board-table th.name-th{position:sticky;left:0;z-index:35;width:var(--col-w);min-width:var(--col-w)}
+.board-table th:last-child{border-right:none}
+
+/* Group header row */
+tr.ghead td{background:var(--bg2);height:36px;font-size:12px;font-weight:700;color:var(--tx);border-bottom:1px solid var(--bd2);border-top:2px solid transparent;padding:0}
+tr.ghead td.name-td{position:sticky;left:0;z-index:20;background:var(--bg2)}
+
+/* Task rows */
+tr.task-row{border-bottom:1px solid var(--bd);cursor:default}
+tr.task-row:hover td{background:var(--bg2)}
+tr.task-row td{height:var(--rh);vertical-align:middle;border-right:1px solid var(--bd);padding:0 12px}
+tr.task-row td:last-child{border-right:none}
+tr.task-row td.name-td{position:sticky;left:0;z-index:19;background:var(--bg);padding:0}
+tr.task-row:hover td.name-td{background:var(--bg2)}
+
+/* Sticky name cell */
+.name-inner{display:flex;align-items:center;height:var(--rh);gap:0}
+.row-stripe{width:6px;height:100%;flex-shrink:0;border-radius:0}
+.row-check{width:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.row-check input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--acc)}
+.row-name{flex:1;overflow:hidden;padding:0 8px}
+.rn-text{font-size:13px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;cursor:text;border-radius:4px;padding:2px 4px}
+.rn-text:hover{background:var(--bg3)}
+.rn-text:focus{outline:2px solid var(--acc);background:var(--bg)}
+
+/* Add task row */
+tr.add-row td{height:32px;background:var(--bg);padding:0}
+tr.add-row td.name-td{position:sticky;left:0;z-index:19;background:var(--bg)}
+.add-task-btn{width:100%;height:32px;border:none;background:transparent;color:var(--tx3);font-size:12px;text-align:left;padding:0 0 0 46px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.add-task-btn:hover{color:var(--acc);background:var(--acc2)}
+
+/* Add group row */
+tr.add-group td{height:36px;background:var(--bg);padding:8px 12px}
+.add-group-btn{border:1px dashed var(--bd2);border-radius:var(--r);padding:0 14px;height:28px;background:transparent;color:var(--tx2);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.add-group-btn:hover{border-color:var(--acc);color:var(--acc);background:var(--acc2)}
+
+/* Collapse toggle */
+.grp-toggle{background:none;border:none;cursor:pointer;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:4px;color:var(--tx2);flex-shrink:0;margin-left:8px;transition:transform .15s}
+.grp-toggle.open{transform:rotate(90deg)}
+.grp-toggle:hover{background:var(--bd)}
+
+/* Group label */
+.grp-label{display:flex;align-items:center;gap:8px;padding:0 0 0 4px;height:36px}
+.grp-name{font-size:13px;font-weight:700;cursor:text;border-radius:4px;padding:2px 6px}
+.grp-name:focus{outline:2px solid var(--acc)}
+.grp-count{font-size:11px;font-weight:400;color:var(--tx3);margin-left:2px}
+
+/* Cell chips */
+.chip{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 10px;border-radius:var(--r);font-size:11px;font-weight:500;white-space:nowrap;cursor:pointer;border:none;outline:none;min-width:60px}
+.chip:hover{filter:brightness(.93)}
+.c-done{background:#00c875;color:#fff}
+.c-prog{background:#fdab3d;color:#fff}
+.c-stuck{background:#e2445c;color:#fff}
+.c-none{background:var(--bg3);color:var(--tx2)}
+/* Priority */
+.pri-chip{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 10px;border-radius:var(--r);font-size:11px;font-weight:500;white-space:nowrap;cursor:pointer;border:none;outline:none;min-width:54px}
+.pri-chip:hover{filter:brightness(.93)}
+.p-hi{background:#e2445c;color:#fff}
+.p-med{background:#fdab3d;color:#fff}
+.p-lo{background:#00c875;color:#fff}
+.p-none{background:var(--bg3);color:var(--tx2)}
+
+/* Owner avatars */
+.av-wrap{display:flex;gap:3px;flex-wrap:wrap}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;color:#fff;border:2px solid var(--bg)}
+.av:hover{transform:scale(1.12)}
+
+/* Date cells */
+.date-cell{font-size:12px;color:var(--tx2);white-space:nowrap;cursor:pointer}
+.date-cell:hover{color:var(--acc)}
+.date-cell.overdue{color:#e2445c}
+.date-cell.today{color:#00c875;font-weight:600}
+input.date-inp{font-size:12px;color:var(--tx);border:none;background:transparent;width:100%;outline:none;cursor:pointer}
+input.date-inp:focus{outline:2px solid var(--acc);border-radius:4px}
+
+/* Timeline bars */
+td.tl-cell{padding:0 4px;min-width:200px}
+.tl-bg{position:relative;height:var(--rh);display:flex;align-items:center}
+.tl-bar{height:18px;border-radius:6px;min-width:8px;cursor:grab;position:relative;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:600;color:rgba(255,255,255,.9);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tl-bar:active{cursor:grabbing}
+.tl-today{position:absolute;top:0;bottom:0;width:2px;background:#e2445c;z-index:2;pointer-events:none}
+
+/* Gantt tab */
+.gantt-wrap{flex:1;overflow:auto;display:flex;flex-direction:column}
+.gantt-split{display:flex;height:100%;min-height:0}
+.gantt-left{width:360px;min-width:220px;max-width:500px;flex-shrink:0;overflow-y:auto;border-right:2px solid var(--bd2)}
+.gantt-right{flex:1;overflow:auto;position:relative}
+
+/* Empty timeline */
+.tl-empty{color:var(--tx3);font-size:11px;font-style:italic}
+
+/* Popup */
+.popup-overlay{position:fixed;inset:0;z-index:100;display:none}
+.popup-overlay.open{display:block}
+.popup{position:fixed;background:var(--bg);border:1px solid var(--bd2);border-radius:var(--r);z-index:200;box-shadow:0 6px 20px rgba(0,0,0,.14);min-width:160px;overflow:hidden;display:none}
+.popup.open{display:block}
+.popup-item{padding:8px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--tx)}
+.popup-item:hover{background:var(--bg3)}
+.popup-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+
+/* Summary row */
+tr.sum-row td{background:var(--bg2);height:28px;font-size:11px;color:var(--tx3);padding:0 12px;border-top:1px solid var(--bd2);border-right:1px solid var(--bd)}
+tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
+.sum-bar{display:flex;gap:2px;height:6px;border-radius:4px;overflow:hidden;width:90px}
+.sb-seg{height:100%}
+
+/* ── SIDE PANEL ── */
+.panel-backdrop{position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.22);display:none;transition:opacity .2s}
+.panel-backdrop.open{display:block}
+.side-panel{position:fixed;top:0;right:0;bottom:0;width:42%;min-width:360px;max-width:700px;background:var(--bg);border-left:1px solid var(--bd2);z-index:90;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.side-panel.open{transform:translateX(0)}
+.sp-header{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--bd);gap:10px;flex-shrink:0;background:var(--bg2)}
+.sp-close{margin-left:auto;width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--tx2);font-size:20px;line-height:1;flex-shrink:0}
+.sp-close:hover{background:var(--bd2);color:var(--tx)}
+.sp-body{flex:1;overflow-y:auto;padding:20px}
+.sp-section{margin-bottom:20px}
+.sp-label{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.sp-field{font-size:14px;color:var(--tx);border:1px solid transparent;border-radius:6px;padding:5px 8px;cursor:text;background:transparent;width:100%;display:block;min-height:32px}
+.sp-field:hover{border-color:var(--bd2);background:var(--bg2)}
+.sp-field:focus{outline:none;border-color:var(--acc);background:var(--bg)}
+.sp-stream-badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--r);font-size:12px;font-weight:600;color:#fff;flex-shrink:0;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-row{display:flex;gap:16px}
+.sp-col{flex:1;min-width:0}
+.sp-date-inp{font-size:13px;color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:5px 8px;background:var(--bg);width:100%;cursor:pointer}
+.sp-date-inp:focus{outline:2px solid var(--acc)}
+.sp-av-wrap{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.sp-av-add{width:26px;height:26px;border-radius:50%;border:2px dashed var(--bd2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:18px;line-height:1;flex-shrink:0}
+.sp-av-add:hover{border-color:var(--acc);color:var(--acc)}
+.comment-list{display:flex;flex-direction:column;gap:10px}
+.comment-item{display:flex;gap:8px;align-items:flex-start}
+.comment-body{flex:1;background:var(--bg2);border-radius:8px;padding:8px 10px}
+.comment-meta{font-size:11px;color:var(--tx3);margin-bottom:3px}
+.comment-text{font-size:13px;color:var(--tx);white-space:pre-wrap;word-break:break-word}
+.comment-inp-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px}
+.comment-inp{flex:1;font-size:13px;border:1px solid var(--bd2);border-radius:8px;padding:8px 10px;background:var(--bg);color:var(--tx);resize:none;font-family:inherit;line-height:1.4}
+.comment-inp:focus{outline:2px solid var(--acc)}
+.comment-send{height:36px;padding:0 16px;border:none;border-radius:8px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+.comment-send:hover{filter:brightness(1.08)}
+.sp-divider{height:1px;background:var(--bd);margin:0 0 20px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="board-title">Content development plan</span>
+  <div class="tb-sep"></div>
+  <button class="tb-btn">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+    Activity
+  </button>
+  <button class="tb-btn" onclick="exportHtml()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h10M8 3v7M5 7l3 3 3-3"/></svg>
+    Export
+  </button>
+  <div class="spacer"></div>
+  <button class="tb-btn">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"/><path d="M11 11l2.5 2.5"/></svg>
+    Search
+  </button>
+  <button class="tb-btn pri" onclick="openAddGroup()">+ New group</button>
+</div>
+
+<div class="subbar">
+  <div class="view-tabs">
+    <button class="vt on" id="vtMain" onclick="setView('main')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="2.5" rx="1"/><rect x="2" y="7" width="12" height="2.5" rx="1"/><rect x="2" y="11" width="7" height="2.5" rx="1"/></svg>
+      Main table
+    </button>
+    <button class="vt" id="vtGantt" onclick="setView('gantt')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="6" height="2.5" rx="1"/><rect x="5" y="7" width="8" height="2.5" rx="1"/><rect x="3" y="11" width="5" height="2.5" rx="1"/></svg>
+      Gantt
+    </button>
+  </div>
+  <div class="filter-bar">
+    <button class="flt">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
+      Filter
+    </button>
+    <select class="flt" id="streamFil" onchange="renderView()"><option value="all">All groups</option></select>
+    <select class="flt" id="statusFil" onchange="renderView()"><option value="all">All statuses</option><option value="Done">Done</option><option value="In progress">In progress</option><option value="">No status</option></select>
+    <select class="flt" id="leadFil" onchange="renderView()"><option value="all">All owners</option></select>
+  </div>
+  <button class="add-main" onclick="openAddGroup()">+ Add task</button>
+</div>
+
+<div id="mainView" class="grid-wrap">
+  <table class="board-table" id="boardTable">
+    <thead>
+      <tr>
+        <th class="name-th" style="padding-left:46px">Task name</th>
+        <th style="width:110px">Owner</th>
+        <th style="width:120px">Status</th>
+        <th style="width:90px">Priority</th>
+        <th style="width:110px">Start date</th>
+        <th style="width:110px">End date</th>
+        <th style="width:80px">Effort</th>
+        <th style="width:100px">Timeframe</th>
+        <th style="min-width:200px">Timeline</th>
+      </tr>
+    </thead>
+    <tbody id="boardBody"></tbody>
+  </table>
+</div>
+
+<div id="ganttView" style="display:none" class="gantt-wrap">
+  <div id="ganttInner"></div>
+</div>
+
+<div class="panel-backdrop" id="panelBackdrop" onclick="closePanel()"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="sp-header">
+    <span id="spStreamBadge" class="sp-stream-badge"></span>
+    <button class="sp-close" onclick="closePanel()">&#x2715;</button>
+  </div>
+  <div class="sp-body" id="spBody"></div>
+</div>
+
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()"></div>
+<div class="popup" id="popup"></div>
+
+<script>
+const STREAMS={
+  'CB-L-Low':'#7b5ea7',
+  'CB-U':'#00c875',
+  'CB-L-Medium':'#579bfc',
+  'In person - process':'#fdab3d',
+  'In person - Location':'#e2445c',
+  'Standards Aus':'#ff642e',
+  'Marking Tool - Decomissioning':'#676879',
+  'Owner Builder module':'#a358df',
+  'Gas Module':'#03a9f4',
+  'Janison Security / Roles':'#00c875',
+  'Plumbing':'#e2445c',
+  'Roles and Structure':'#fdab3d',
+  'Long-Term':'#6c6cff',
+  'Supports - docs':'#008060',
+  'Supports - Trainings':'#d83a52',
+  'JAI':'#ff642e'
+};
+const AV_COLORS={'TF':'#a25ddc','MS':'#00c875','PM':'#fdab3d','ACER':'#579bfc','NR':'#ff642e','HC':'#e2445c','MF':'#03a9f4','CC':'#676879','CF':'#d83a52','Ot':'#6c6cff'};
+const PRIORITIES={'':'p-none','Low':'p-lo','Medium':'p-med','High':'p-hi'};
+let TASKS=[
+  {id:1,st:'CB-L-Low',nm:'Minimum questions finalised',ld:['MS'],ef:'',tf:'4 days',s:'2026-03-13',e:'2026-03-16',status:'Done',pri:'High'},
+  {id:2,st:'CB-L-Low',nm:'Ensure availabilities for standard setting',ld:['PM'],ef:'',tf:'3 days',s:'2026-03-11',e:'2026-03-13',status:'In progress',pri:'Medium'},
+  {id:3,st:'CB-L-Low',nm:'Build test',ld:['ACER','TF','MS'],ef:'',tf:'2 days',s:'2026-03-17',e:'2026-03-18',status:'Done',pri:'High'},
+  {id:4,st:'CB-L-Low',nm:'Add questions to Janison + Screenshot',ld:['NR'],ef:'',tf:'1 day',s:'2026-03-19',e:'2026-03-19',status:'Done',pri:''},
+  {id:5,st:'CB-L-Low',nm:'Proofreading',ld:['ACER'],ef:'',tf:'4 days',s:'2026-03-20',e:'2026-03-23',status:'Done',pri:''},
+  {id:6,st:'CB-L-Low',nm:'Update questions in Janison + re-screenshot',ld:['TF','NR'],ef:'',tf:'2 days',s:'2026-03-24',e:'2026-03-25',status:'In progress',pri:'Medium'},
+  {id:7,st:'CB-L-Low',nm:'Provide questions to Psychometrics / Signum',ld:['TF','NR'],ef:'',tf:'1 day',s:'2026-03-25',e:'2026-03-25',status:'',pri:'Low'},
+  {id:8,st:'CB-L-Low',nm:'Standard setting',ld:['ACER'],ef:'',tf:'2 days',s:'2026-04-16',e:'2026-04-17',status:'',pri:'High'},
+  {id:9,st:'CB-L-Low',nm:'Update pass mark, finalise & seek approval',ld:['TF','MS'],ef:'',tf:'5 days',s:'2026-04-17',e:'2026-04-21',status:'',pri:'High'},
+  {id:10,st:'CB-L-Low',nm:'Launch new exam',ld:['TF','MS'],ef:'',tf:'4 days',s:'2026-04-22',e:'2026-04-25',status:'',pri:'High'},
+  {id:11,st:'CB-U',nm:'Minimum questions finalised',ld:['MS'],ef:'',tf:'4 days',s:'2026-04-03',e:'2026-04-06',status:'',pri:'High'},
+  {id:12,st:'CB-U',nm:'Ensure availabilities for standard setting',ld:['PM'],ef:'',tf:'3 days',s:'2026-04-01',e:'2026-04-03',status:'',pri:'Medium'},
+  {id:13,st:'CB-U',nm:'Build test',ld:['ACER','TF','MS'],ef:'',tf:'2 days',s:'2026-04-07',e:'2026-04-08',status:'',pri:'High'},
+  {id:14,st:'CB-U',nm:'Add questions to Janison + Screenshot',ld:['NR'],ef:'',tf:'1 day',s:'2026-04-09',e:'2026-04-09',status:'',pri:''},
+  {id:15,st:'CB-U',nm:'Proofreading',ld:['ACER'],ef:'',tf:'4 days',s:'2026-04-10',e:'2026-04-13',status:'',pri:''},
+  {id:16,st:'CB-U',nm:'Update questions in Janison + re-screenshot',ld:['TF','NR'],ef:'',tf:'2 days',s:'2026-04-14',e:'2026-04-15',status:'',pri:'Medium'},
+  {id:17,st:'CB-U',nm:'Provide questions to Psychometrics / Signum',ld:['TF','NR'],ef:'',tf:'1 day',s:'2026-04-15',e:'2026-04-15',status:'',pri:'Low'},
+  {id:18,st:'CB-U',nm:'Standard setting',ld:['ACER'],ef:'',tf:'2 days',s:'2026-04-22',e:'2026-04-23',status:'',pri:'High'},
+  {id:19,st:'CB-U',nm:'Update pass mark, finalise & seek approval',ld:['TF','MS'],ef:'',tf:'5 days',s:'2026-04-23',e:'2026-04-27',status:'',pri:'High'},
+  {id:20,st:'CB-U',nm:'Launch new exam',ld:['TF','MS'],ef:'',tf:'3 days',s:'2026-04-28',e:'2026-04-30',status:'',pri:'High'},
+  {id:21,st:'CB-L-Medium',nm:'Minimum questions finalised',ld:['MS'],ef:'',tf:'4 days',s:'2026-04-10',e:'2026-04-13',status:'',pri:'High'},
+  {id:22,st:'CB-L-Medium',nm:'Ensure availabilities for standard setting',ld:['PM'],ef:'',tf:'3 days',s:'2026-04-08',e:'2026-04-10',status:'',pri:'Medium'},
+  {id:23,st:'CB-L-Medium',nm:'Build test',ld:['ACER','TF','MS'],ef:'',tf:'2 days',s:'2026-04-14',e:'2026-04-15',status:'',pri:'High'},
+  {id:24,st:'CB-L-Medium',nm:'Add questions to Janison + Screenshot',ld:['NR'],ef:'',tf:'1 day',s:'2026-04-16',e:'2026-04-16',status:'',pri:''},
+  {id:25,st:'CB-L-Medium',nm:'Proofreading',ld:['ACER'],ef:'',tf:'4 days',s:'2026-04-17',e:'2026-04-20',status:'',pri:''},
+  {id:26,st:'CB-L-Medium',nm:'Update questions in Janison + re-screenshot',ld:['TF','NR'],ef:'',tf:'2 days',s:'2026-04-21',e:'2026-04-22',status:'',pri:'Medium'},
+  {id:27,st:'CB-L-Medium',nm:'Provide questions to Psychometrics',ld:['TF','NR'],ef:'',tf:'1 day',s:'2026-04-22',e:'2026-04-22',status:'',pri:'Low'},
+  {id:28,st:'CB-L-Medium',nm:'Standard setting',ld:['ACER'],ef:'',tf:'2 days',s:'2026-04-29',e:'2026-04-30',status:'',pri:'High'},
+  {id:29,st:'CB-L-Medium',nm:'Update pass mark, finalise & seek approval',ld:['TF','MS'],ef:'',tf:'5 days',s:'2026-04-30',e:'2026-05-04',status:'',pri:'High'},
+  {id:30,st:'CB-L-Medium',nm:'Launch new exam',ld:['TF','MS'],ef:'',tf:'3 days',s:'2026-05-05',e:'2026-05-07',status:'',pri:'High'},
+  {id:31,st:'In person - process',nm:'Clifton Image process',ld:['TF'],ef:'1d',tf:'2 weeks',s:'2026-04-09',e:'2026-04-22',status:'',pri:'Medium'},
+  {id:32,st:'In person - process',nm:'Test with Cliftons image',ld:['TF','HC'],ef:'1d',tf:'1 week',s:'2026-04-23',e:'2026-04-29',status:'',pri:'Medium'},
+  {id:33,st:'In person - process',nm:'Login process',ld:['HC'],ef:'1d',tf:'2 weeks',s:'2026-04-30',e:'2026-05-13',status:'',pri:'Low'},
+  {id:34,st:'In person - process',nm:'Overarching in-person process',ld:['TF'],ef:'2d',tf:'2 weeks',s:'2026-05-14',e:'2026-05-27',status:'',pri:'Low'},
+  {id:35,st:'Standards Aus',nm:'Legal review',ld:['TF'],ef:'0.5d',tf:'3 weeks',s:'2026-04-09',e:'2026-04-13',status:'',pri:'High'},
+  {id:36,st:'Standards Aus',nm:'Finalise agreement / countersign',ld:['TF'],ef:'1d',tf:'3 weeks',s:'2026-04-14',e:'2026-05-05',status:'',pri:'High'},
+  {id:37,st:'Standards Aus',nm:'Align on all standards required',ld:['MF','MS'],ef:'1d',tf:'1 week',s:'2026-04-09',e:'2026-04-15',status:'',pri:'Medium'},
+  {id:38,st:'Standards Aus',nm:'Get access to Standards Aus system',ld:['TF'],ef:'0d',tf:'',s:'2026-05-06',e:'2026-05-06',status:'',pri:''},
+  {id:39,st:'Standards Aus',nm:'Watermark standards + copyright images',ld:['HC'],ef:'2d',tf:'2 days',s:'2026-05-07',e:'2026-05-08',status:'',pri:''},
+  {id:40,st:'Standards Aus',nm:'Upload standards into Janison',ld:['TF'],ef:'2d',tf:'2 days',s:'2026-05-11',e:'2026-05-12',status:'',pri:'Low'},
+  {id:41,st:'Standards Aus',nm:'Launch',ld:['TF'],ef:'0.5d',tf:'',s:'2026-05-15',e:'2026-05-15',status:'',pri:'High'},
+  {id:42,st:'Marking Tool - Decomissioning',nm:'Develop server requirement with Otdam',ld:['TF','Ot'],ef:'1d',tf:'2 weeks',s:'2026-04-09',e:'2026-04-22',status:'',pri:'Medium'},
+  {id:43,st:'Marking Tool - Decomissioning',nm:'Plan decommissioning of Moodle',ld:['TF'],ef:'2d',tf:'2 weeks',s:'2026-04-23',e:'2026-05-06',status:'',pri:'Low'},
+  {id:44,st:'Owner Builder module',nm:'Determine business approach',ld:['TF'],ef:'1d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:45,st:'Owner Builder module',nm:'Extend Kineo or deploy in Janison',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:46,st:'Gas Module',nm:'Seek business approval for reduced use',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'High'},
+  {id:47,st:'Gas Module',nm:'Recreate module content for Janison',ld:['TF'],ef:'5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:48,st:'Gas Module',nm:'Build and test in Janison',ld:['TF'],ef:'2d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:49,st:'Gas Module',nm:'Decommissioning of Deepspace',ld:['TF'],ef:'1d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:50,st:'Janison Security / Roles',nm:'Draft a WI or Business Rule',ld:['TF'],ef:'2d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:51,st:'Janison Security / Roles',nm:'Seek reviews / consultation from D&D',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:52,st:'Janison Security / Roles',nm:'Review and reallocate all users',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:53,st:'Plumbing',nm:'Develop process map for online exams',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:54,st:'Plumbing',nm:'Update rollout plan',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:55,st:'Plumbing',nm:'Finalise consultation pack',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:56,st:'Roles and Structure',nm:'Draft proposed RACI',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'High'},
+  {id:57,st:'Roles and Structure',nm:'Review RACI + align with Sponsor(s)',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:58,st:'Long-Term',nm:'Develop capability development roadmap',ld:['TF'],ef:'0.5d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:59,st:'Supports - docs',nm:'Overarching docs',ld:['TF'],ef:'2d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:60,st:'Supports - docs',nm:'Item Dev documentation',ld:['TF'],ef:'4d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:61,st:'Supports - docs',nm:'Exam Design',ld:['TF'],ef:'4d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:62,st:'Supports - Trainings',nm:'MCC training',ld:['TF'],ef:'4d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:63,st:'Supports - Trainings',nm:'SS Participation',ld:['TF'],ef:'4d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Low'},
+  {id:64,st:'Supports - Trainings',nm:'Facilitator training',ld:['TF'],ef:'4d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'High'},
+  {id:65,st:'JAI',nm:'Bake in JAI configuration pre-trial',ld:['CF'],ef:'2d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'Medium'},
+  {id:66,st:'JAI',nm:'Get contract-ready with D&D consultations',ld:['CF'],ef:'2d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'High'},
+  {id:67,st:'JAI',nm:'Finalise business case and measures',ld:['TF'],ef:'2d',tf:'',s:'2026-04-09',e:'2026-07-01',status:'',pri:'High'},
+  {id:68,st:'JAI',nm:'Commence use of JAI',ld:['TF'],ef:'20d',tf:'Mid June',s:'2026-06-15',e:'2026-08-14',status:'',pri:'High'},
+];
+let nextId=69, currentView='main', collapsed={};
+TASKS.forEach(t=>{if(!t.comments)t.comments=[];});
+let panelTaskId=null;
+const KNOWN_OWNERS=['TF','MS','PM','ACER','NR','HC','MF','CC','CF','Ot'];
+
+const MIN_D=new Date('2026-03-01'),MAX_D=new Date('2026-12-31'),TODAY=new Date('2026-04-09');
+const PPD=3.5;
+function dOff(d){return Math.max(0,Math.ceil((new Date(d)-MIN_D)/86400000))}
+function px(d){return dOff(d)*PPD}
+function spx(s,e){return Math.max(8,(Math.ceil((new Date(e)-new Date(s))/86400000)+1)*PPD)}
+function fmtD(d){if(!d)return'';try{const[y,m,dy]=d.split('-');return`${dy}/${m}/${y.slice(2)}`}catch{return''}}
+function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d)-TODAY)/86400000)}
+
+// ── FILTERS ──
+function buildFilters(){
+  const sf=document.getElementById('streamFil'),lf=document.getElementById('leadFil');
+  const sv=sf.value,lv=lf.value;
+  sf.innerHTML='<option value="all">All groups</option>';
+  Object.keys(STREAMS).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(s===sv)o.selected=true;sf.appendChild(o);});
+  lf.innerHTML='<option value="all">All owners</option>';
+  [...new Set(TASKS.flatMap(t=>t.ld))].filter(Boolean).sort().forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;if(l===lv)o.selected=true;lf.appendChild(o);});
+}
+
+function filteredTasks(){
+  const sf=document.getElementById('streamFil').value;
+  const stf=document.getElementById('statusFil').value;
+  const lf=document.getElementById('leadFil').value;
+  return TASKS.filter(t=>
+    (sf==='all'||t.st===sf)&&
+    (stf==='all'||t.status===stf)&&
+    (lf==='all'||t.ld.includes(lf))
+  );
+}
+
+// ── RENDER MAIN TABLE ──
+function renderMain(){
+  const tasks=filteredTasks();
+  const groups={};
+  tasks.forEach(t=>{if(!groups[t.st])groups[t.st]=[];groups[t.st].push(t);});
+  const tbody=document.getElementById('boardBody');tbody.innerHTML='';
+  const totalDays=Math.ceil((MAX_D-MIN_D)/86400000);
+  const tlW=totalDays*PPD;
+  const todayPx=px(TODAY.toISOString().slice(0,10));
+
+  Object.entries(groups).forEach(([stream,items])=>{
+    const col=STREAMS[stream]||'#676879';
+    const isCollapsed=collapsed[stream];
+    const done=items.filter(t=>t.status==='Done').length;
+    const prog=items.filter(t=>t.status==='In progress').length;
+    const none=items.length-done-prog;
+
+    // Group header
+    const gr=document.createElement('tr');gr.className='ghead';
+    const gnc=document.createElement('td');gnc.className='name-td';gnc.style.borderLeft=`4px solid ${col}`;
+    gnc.colSpan=1;
+    gnc.innerHTML=`<div class="grp-label">
+      <button class="grp-toggle ${isCollapsed?'':'open'}" onclick="toggleGroup('${stream.replace(/'/g,"\\'")}')">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"/></svg>
+      </button>
+      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:${col}">${stream}</span>
+      <span class="grp-count">${items.length} item${items.length===1?'':'s'}</span>
+    </div>`;
+    gr.appendChild(gnc);
+    // Fill remaining cols
+    const cols=['','','','','','','',''];
+    cols.forEach((_,i)=>{
+      const td=document.createElement('td');
+      if(i===7){
+        // mini progress bar in timeline col
+        td.className='tl-cell';
+        td.style.padding='0 12px';
+        const bar=document.createElement('div');bar.style.cssText='display:flex;gap:2px;height:6px;border-radius:4px;overflow:hidden;width:100px';
+        if(done){const s=document.createElement('div');s.style.cssText=`flex:${done};background:#00c875;border-radius:4px 0 0 4px`; bar.appendChild(s);}
+        if(prog){const s=document.createElement('div');s.style.cssText=`flex:${prog};background:#fdab3d`; bar.appendChild(s);}
+        if(none){const s=document.createElement('div');s.style.cssText=`flex:${none};background:var(--bg3);border-radius:0 4px 4px 0`; bar.appendChild(s);}
+        td.appendChild(bar);
+      }
+      gr.appendChild(td);
+    });
+    tbody.appendChild(gr);
+
+    if(isCollapsed)return;
+
+    // Tasks
+    items.forEach(t=>{
+      const row=document.createElement('tr');row.className='task-row';row.dataset.id=t.id;
+      row.addEventListener('click',function(e){
+        const tg=e.target;
+        // Skip interactive elements — don't open panel for these
+        if(tg.tagName==='BUTTON'||tg.tagName==='INPUT'||tg.tagName==='A')return;
+        if(tg.isContentEditable||tg.getAttribute('contenteditable')==='true')return;
+        if(tg.classList.contains('date-cell')||tg.classList.contains('chip')||tg.classList.contains('pri-chip'))return;
+        if(tg.classList.contains('av')||tg.classList.contains('grp-toggle'))return;
+        // Walk up to check parent too (e.g. SVG inside button)
+        const par=tg.parentElement;
+        if(par&&(par.tagName==='BUTTON'||par.classList.contains('chip')||par.classList.contains('pri-chip')))return;
+        openPanel(t.id);
+      });
+
+      // Name cell
+      const nc=document.createElement('td');nc.className='name-td';
+      nc.innerHTML=`<div class="name-inner">
+        <div class="row-stripe" style="background:${col}"></div>
+        <div class="row-check"><input type="checkbox" ${t.status==='Done'?'checked':''} onchange="toggleDone(${t.id},this)"></div>
+        <div class="row-name">
+          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="${t.id}" onblur="updateField(${t.id},'nm',this.textContent.trim())">${t.nm}</span>
+        </div>
+      </div>`;
+      row.appendChild(nc);
+
+      // Owner
+      const oc=document.createElement('td');
+      const avw=document.createElement('div');avw.className='av-wrap';
+      t.ld.slice(0,3).forEach(l=>{const a=document.createElement('div');a.className='av';a.style.background=AV_COLORS[l]||'#676879';a.title=l;a.textContent=l.slice(0,2);avw.appendChild(a);});
+      oc.appendChild(avw);row.appendChild(oc);
+
+      // Status
+      const sc=document.createElement('td');
+      sc.innerHTML=`<button class="chip ${t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':'c-none'}" onclick="openStatusPopup(event,${t.id})">${t.status||'—'}</button>`;
+      row.appendChild(sc);
+
+      // Priority
+      const pc=document.createElement('td');
+      const pk=PRIORITIES[t.pri||'']||'p-none';
+      pc.innerHTML=`<button class="pri-chip ${pk}" onclick="openPriPopup(event,${t.id})">${t.pri||'—'}</button>`;
+      row.appendChild(pc);
+
+      // Start date
+      const sdc=document.createElement('td');
+      const du=daysUntil(t.s);
+      sdc.innerHTML=`<span class="date-cell${du!==null&&du<0&&t.status!=='Done'?' overdue':du===0?' today':''}">${fmtD(t.s)||'—'}</span>`;
+      sdc.querySelector('.date-cell').onclick=()=>openDateEdit(sdc,'s',t.id);
+      row.appendChild(sdc);
+
+      // End date
+      const edc=document.createElement('td');
+      const due=daysUntil(t.e);
+      edc.innerHTML=`<span class="date-cell${due!==null&&due<0&&t.status!=='Done'?' overdue':due===0?' today':''}">${fmtD(t.e)||'—'}</span>`;
+      edc.querySelector('.date-cell').onclick=()=>openDateEdit(edc,'e',t.id);
+      row.appendChild(edc);
+
+      // Effort
+      const efc=document.createElement('td');
+      efc.innerHTML=`<span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(${t.id},'ef',this.textContent.trim())">${t.ef||'—'}</span>`;
+      row.appendChild(efc);
+
+      // Timeframe
+      const tfc=document.createElement('td');
+      tfc.innerHTML=`<span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(${t.id},'tf',this.textContent.trim())">${t.tf||'—'}</span>`;
+      row.appendChild(tfc);
+
+      // Timeline mini bar
+      const tlc=document.createElement('td');tlc.className='tl-cell';
+      if(t.s&&t.e){
+        const wrap=document.createElement('div');wrap.className='tl-bg';wrap.style.width=tlW+'px';
+        const todayLine=document.createElement('div');todayLine.className='tl-today';todayLine.style.left=todayPx+'px';
+        const bar=document.createElement('div');bar.className='tl-bar';
+        bar.style.cssText=`left:${px(t.s)}px;width:${spx(t.s,t.e)}px;background:${col};position:absolute`;
+        bar.title=`${fmtD(t.s)} → ${fmtD(t.e)}`;
+        wrap.appendChild(todayLine);wrap.appendChild(bar);tlc.appendChild(wrap);
+      } else {tlc.innerHTML=`<span class="tl-empty">No dates set</span>`;}
+      row.appendChild(tlc);
+      tbody.appendChild(row);
+    });
+
+    // Add task row
+    const esc=stream.replace(/[^a-zA-Z0-9]/g,'_');
+    const ar=document.createElement('tr');ar.className='add-row';
+    const ac=document.createElement('td');ac.className='name-td';ac.colSpan=9;
+    ac.style.paddingLeft='0';
+    ac.innerHTML=`<button class="add-task-btn" onclick="addTask('${stream.replace(/'/g,"\\'")}')">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
+      Add task
+    </button>`;
+    ar.appendChild(ac);tbody.appendChild(ar);
+  });
+
+  // Add group row
+  const agr=document.createElement('tr');agr.className='add-group';
+  const agc=document.createElement('td');agc.colSpan=9;
+  agc.innerHTML=`<button class="add-group-btn" onclick="openAddGroup()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
+    Add new group of items
+  </button>`;
+  agr.appendChild(agc);tbody.appendChild(agr);
+}
+
+// ── GANTT VIEW ──
+function renderGantt(){
+  const tasks=filteredTasks();
+  const groups={};
+  tasks.forEach(t=>{if(!groups[t.st])groups[t.st]=[];groups[t.st].push(t);});
+  const totalD=Math.ceil((MAX_D-MIN_D)/86400000);
+  const tw=totalD*PPD;
+  const todayPx=px(TODAY.toISOString().slice(0,10));
+
+  // Build month/week header
+  function buildGanttHdr(){
+    let months='',weeks='';
+    let d=new Date(MIN_D.getFullYear(),MIN_D.getMonth(),1);
+    while(d<=MAX_D){
+      const mEnd=new Date(d.getFullYear(),d.getMonth()+1,0);
+      const s=Math.max(0,Math.ceil((d-MIN_D)/86400000));
+      const e=Math.min(totalD,Math.ceil((mEnd-MIN_D)/86400000)+1);
+      const w=(e-s)*PPD;
+      months+=`<div style="width:${w}px;flex-shrink:0;text-align:center;font-size:11px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);display:flex;align-items:center;justify-content:center;height:22px">${d.toLocaleString('default',{month:'short',year:'2-digit'})}</div>`;
+      let wd=new Date(d);
+      while(wd<=mEnd&&wd<=MAX_D){
+        const ws=Math.max(0,Math.ceil((wd-MIN_D)/86400000));
+        const we=new Date(wd);we.setDate(we.getDate()+6);
+        const ww=(Math.min(totalD,Math.ceil((we-MIN_D)/86400000)+1)-ws)*PPD;
+        weeks+=`<div style="width:${ww}px;flex-shrink:0;text-align:center;font-size:10px;color:var(--tx3);border-right:1px solid var(--bd);display:flex;align-items:center;justify-content:center;height:22px">${String(wd.getDate()).padStart(2,'0')}</div>`;
+        wd.setDate(wd.getDate()+7);
+      }
+      d=new Date(d.getFullYear(),d.getMonth()+1,1);
+    }
+    return `<div style="display:flex;height:22px;border-bottom:1px solid var(--bd)">${months}</div><div style="display:flex;height:22px;border-bottom:2px solid var(--bd2)">${weeks}</div>`;
+  }
+
+  let leftRows='',rightRows='';
+  const RH=36;
+
+  // Header row for left
+  leftRows+=`<div style="height:44px;border-bottom:2px solid var(--bd2);display:flex;align-items:center;padding:0 12px;font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;background:var(--bg2)">Task name</div>`;
+
+  Object.entries(groups).forEach(([stream,items])=>{
+    const col=STREAMS[stream]||'#676879';
+    // Group header left
+    leftRows+=`<div style="height:${RH}px;background:var(--bg2);border-bottom:1px solid var(--bd2);display:flex;align-items:center;gap:8px;padding:0 8px;border-left:4px solid ${col}">
+      <span style="font-size:12px;font-weight:700;color:${col}">${stream}</span>
+      <span style="font-size:11px;color:var(--tx3)">${items.length}</span>
+    </div>`;
+    // Group header right (bar bg)
+    rightRows+=`<div style="height:${RH}px;background:var(--bg2);border-bottom:1px solid var(--bd2);position:relative">
+      <div style="position:absolute;top:0;bottom:0;left:${todayPx}px;width:2px;background:#e2445c;z-index:2"></div>
+    </div>`;
+
+    items.forEach(t=>{
+      leftRows+=`<div style="height:${RH}px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;padding:0 8px 0 16px" title="${t.nm}">
+        <div class="av" style="width:22px;height:22px;font-size:8px;background:${AV_COLORS[t.ld[0]]||'#676879'};flex-shrink:0">${(t.ld[0]||'?').slice(0,2)}</div>
+        <span style="font-size:12px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${t.nm}</span>
+        <button class="chip ${t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':'c-none'}" style="font-size:10px;height:18px;padding:0 7px;flex-shrink:0">${t.status||'—'}</button>
+      </div>`;
+
+      let barHtml='';
+      if(t.s&&t.e){
+        const bL=px(t.s),bW=spx(t.s,t.e);
+        barHtml=`<div title="${t.nm}: ${fmtD(t.s)}–${fmtD(t.e)}" style="position:absolute;left:${bL}px;width:${bW}px;height:18px;top:9px;border-radius:6px;background:${col};z-index:3;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:700;color:rgba(255,255,255,.9);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:grab">${t.nm}</div>`;
+      }
+      rightRows+=`<div style="height:${RH}px;border-bottom:1px solid var(--bd);position:relative">
+        <div style="position:absolute;top:0;bottom:0;left:${todayPx}px;width:2px;background:#e2445c;z-index:2;pointer-events:none"></div>
+        ${barHtml}
+      </div>`;
+    });
+  });
+
+  document.getElementById('ganttInner').innerHTML=`
+    <div style="display:flex;height:100%;min-height:calc(100vh - 120px)">
+      <div style="width:360px;min-width:360px;flex-shrink:0;border-right:2px solid var(--bd2);overflow-y:auto;overflow-x:hidden">
+        ${leftRows}
+      </div>
+      <div style="flex:1;overflow:auto">
+        <div style="position:sticky;top:0;z-index:30;background:var(--bg2);width:${tw}px">${buildGanttHdr()}</div>
+        <div style="width:${tw}px;position:relative">${rightRows}</div>
+      </div>
+    </div>`;
+}
+
+// ── POPUP HELPERS ──
+let popupCleanup=null;
+function openPopup(e,html,onPick){
+  const p=document.getElementById('popup');
+  p.innerHTML=html;
+  const x=Math.min(e.clientX,window.innerWidth-180),y=e.clientY+8;
+  p.style.cssText=`display:block;left:${x}px;top:${y}px`;
+  document.getElementById('popupOverlay').classList.add('open');
+  popupCleanup=onPick;
+}
+function closePopup(){
+  document.getElementById('popup').style.display='none';
+  document.getElementById('popupOverlay').classList.remove('open');
+  popupCleanup=null;
+}
+function openStatusPopup(e,id){
+  const opts=[['Done','c-done','#00c875'],['In progress','c-prog','#fdab3d'],['Stuck','c-stuck','#e2445c'],['—','c-none','#c3c6d4']];
+  const html=opts.map(([lbl,cls,col])=>`<div class="popup-item" onclick="setStatus(${id},'${lbl==='—'?'':lbl}')"><div class="popup-dot" style="background:${col}"></div>${lbl}</div>`).join('');
+  openPopup(e,html);
+}
+function setStatus(id,val){
+  const t=TASKS.find(x=>x.id===id);if(t){t.status=val;if(val==='Done')t.pri='Low';}
+  closePopup();renderView();
+  if(panelTaskId===id)openPanel(id);
+}
+function openPriPopup(e,id){
+  const opts=[['High','p-hi','#e2445c'],['Medium','p-med','#fdab3d'],['Low','p-lo','#00c875'],['—','p-none','#c3c6d4']];
+  const html=opts.map(([lbl,cls,col])=>`<div class="popup-item" onclick="setPri(${id},'${lbl==='—'?'':lbl}')"><div class="popup-dot" style="background:${col}"></div>${lbl}</div>`).join('');
+  openPopup(e,html);
+}
+function setPri(id,val){const t=TASKS.find(x=>x.id===id);if(t)t.pri=val;closePopup();renderView();if(panelTaskId===id)openPanel(id);}
+
+function openDateEdit(cell,field,id){
+  const t=TASKS.find(x=>x.id===id);if(!t)return;
+  const inp=document.createElement('input');inp.type='date';inp.className='date-inp';inp.value=t[field]||'';
+  inp.onchange=()=>{t[field]=inp.value;renderView();};
+  inp.onblur=()=>{t[field]=inp.value;renderView();};
+  cell.innerHTML='';cell.appendChild(inp);inp.focus();
+}
+
+// ── ACTIONS ──
+function toggleGroup(stream){collapsed[stream]=!collapsed[stream];renderView();}
+function toggleDone(id,el){const t=TASKS.find(x=>x.id===id);if(t)t.status=el.checked?'Done':'';renderView();}
+function updateField(id,field,val){const t=TASKS.find(x=>x.id===id);if(t)t[field]=val;}
+
+function addTask(stream){
+  const nm=prompt(`New task name in "${stream}":`);
+  if(!nm||!nm.trim())return;
+  TASKS.push({id:nextId++,st:stream,nm:nm.trim(),ld:['TF'],ef:'',tf:'',s:'',e:'',status:'',pri:''});
+  renderView();
+}
+function openAddGroup(){
+  const nm=prompt('New group name:');
+  if(!nm||!nm.trim())return;
+  const cols=['#7b5ea7','#00c875','#579bfc','#fdab3d','#e2445c','#ff642e'];
+  STREAMS[nm.trim()]=cols[Object.keys(STREAMS).length%cols.length];
+  buildFilters();renderView();
+}
+
+function setView(v){
+  currentView=v;
+  document.getElementById('vtMain').classList.toggle('on',v==='main');
+  document.getElementById('vtGantt').classList.toggle('on',v==='gantt');
+  document.getElementById('mainView').style.display=v==='main'?'':'none';
+  document.getElementById('ganttView').style.display=v==='gantt'?'':'none';
+  renderView();
+}
+function renderView(){if(currentView==='main')renderMain();else renderGantt();}
+
+function exportHtml(){
+  const html=document.documentElement.outerHTML
+    .replace(/let TASKS=\[[\s\S]*?\];/,'let TASKS='+JSON.stringify(TASKS)+';')
+    .replace(/let nextId=\d+/,'let nextId='+nextId);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download='monday_content_dev_plan.html';a.click();
+}
+
+// ── SIDE PANEL ──
+function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function openPanel(id){
+  const t=TASKS.find(x=>x.id===id);if(!t)return;
+  panelTaskId=id;
+  const col=STREAMS[t.st]||'#676879';
+  const badge=document.getElementById('spStreamBadge');
+  badge.textContent=t.st;badge.style.background=col;
+  document.getElementById('spBody').innerHTML=buildPanelBody(t,col);
+  document.getElementById('panelBackdrop').classList.add('open');
+  document.getElementById('sidePanel').classList.add('open');
+}
+
+function buildPanelBody(t,col){
+  const sCls=t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':t.status==='Stuck'?'c-stuck':'c-none';
+  const pCls=PRIORITIES[t.pri||'']||'p-none';
+  const ownHtml=t.ld.map(l=>`<div class="av" style="background:${AV_COLORS[l]||'#676879'}" title="Click to remove ${escH(l)}" onclick="panelRemoveOwner(${t.id},'${l}')">${escH(l.slice(0,2))}</div>`).join('')
+    +`<button class="sp-av-add" onclick="panelAddOwner(${t.id})" title="Add owner">+</button>`;
+  const cmtHtml=(t.comments||[]).length===0
+    ?`<p style="font-size:12px;color:var(--tx3);margin-top:4px">No comments yet</p>`
+    :(t.comments||[]).map(c=>`<div class="comment-item">
+      <div class="av" style="background:${AV_COLORS[c.author]||'#676879'};width:28px;height:28px;font-size:9px;flex-shrink:0">${escH(c.author.slice(0,2))}</div>
+      <div class="comment-body">
+        <div class="comment-meta">${escH(c.author)} &middot; ${escH(c.ts)}</div>
+        <div class="comment-text">${escH(c.text)}</div>
+      </div>
+    </div>`).join('');
+  return `
+<div class="sp-section">
+  <div class="sp-label">Task name</div>
+  <div class="sp-field" contenteditable="true" spellcheck="false" style="font-size:16px;font-weight:600"
+    onblur="panelSave(${t.id},'nm',this.textContent.trim())">${escH(t.nm)}</div>
+</div>
+<div class="sp-section sp-row">
+  <div class="sp-col">
+    <div class="sp-label">Status</div>
+    <button class="chip ${sCls}" onclick="openStatusPopup(event,${t.id})">${t.status||'&mdash;'}</button>
+  </div>
+  <div class="sp-col">
+    <div class="sp-label">Priority</div>
+    <button class="pri-chip ${pCls}" onclick="openPriPopup(event,${t.id})">${t.pri||'&mdash;'}</button>
+  </div>
+</div>
+<div class="sp-section">
+  <div class="sp-label">Owners</div>
+  <div class="sp-av-wrap">${ownHtml}</div>
+</div>
+<div class="sp-section sp-row">
+  <div class="sp-col">
+    <div class="sp-label">Start date</div>
+    <input type="date" class="sp-date-inp" value="${escH(t.s||'')}" onchange="panelSave(${t.id},'s',this.value)">
+  </div>
+  <div class="sp-col">
+    <div class="sp-label">End date</div>
+    <input type="date" class="sp-date-inp" value="${escH(t.e||'')}" onchange="panelSave(${t.id},'e',this.value)">
+  </div>
+</div>
+<div class="sp-section sp-row">
+  <div class="sp-col">
+    <div class="sp-label">Effort</div>
+    <div class="sp-field" contenteditable="true" spellcheck="false"
+      onblur="panelSave(${t.id},'ef',this.textContent.trim())">${escH(t.ef)}</div>
+  </div>
+  <div class="sp-col">
+    <div class="sp-label">Timeframe</div>
+    <div class="sp-field" contenteditable="true" spellcheck="false"
+      onblur="panelSave(${t.id},'tf',this.textContent.trim())">${escH(t.tf)}</div>
+  </div>
+</div>
+<div class="sp-divider"></div>
+<div class="sp-section">
+  <div class="sp-label">Comments (${(t.comments||[]).length})</div>
+  <div class="comment-list" id="spCmtList">${cmtHtml}</div>
+  <div class="comment-inp-row">
+    <textarea class="comment-inp" id="spCmtInp" placeholder="Write a comment\u2026 (Enter to send, Shift+Enter for newline)" rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();panelAddComment(${t.id})}"></textarea>
+    <button class="comment-send" onclick="panelAddComment(${t.id})">Send</button>
+  </div>
+</div>`;
+}
+
+function closePanel(){
+  document.getElementById('sidePanel').classList.remove('open');
+  document.getElementById('panelBackdrop').classList.remove('open');
+  panelTaskId=null;
+}
+
+function panelSave(id,field,val){
+  const t=TASKS.find(x=>x.id===id);if(t)t[field]=val;
+  renderView();
+}
+
+function panelRemoveOwner(id,owner){
+  const t=TASKS.find(x=>x.id===id);if(!t)return;
+  t.ld=t.ld.filter(l=>l!==owner);
+  renderView();openPanel(id);
+}
+
+function panelAddOwner(id){
+  const t=TASKS.find(x=>x.id===id);if(!t)return;
+  const avail=KNOWN_OWNERS.filter(o=>!t.ld.includes(o));
+  if(!avail.length)return;
+  const html=avail.map(o=>`<div class="popup-item" onclick="panelPickOwner(${id},'${o}')">
+    <div class="av" style="background:${AV_COLORS[o]||'#676879'};width:22px;height:22px;font-size:9px">${o.slice(0,2)}</div>${escH(o)}
+  </div>`).join('');
+  const fakeEvt={clientX:Math.round(window.innerWidth*0.62),clientY:220};
+  openPopup(fakeEvt,html);
+}
+
+function panelPickOwner(id,owner){
+  const t=TASKS.find(x=>x.id===id);
+  if(t&&!t.ld.includes(owner))t.ld.push(owner);
+  closePopup();renderView();openPanel(id);
+}
+
+function panelAddComment(id){
+  const t=TASKS.find(x=>x.id===id);
+  const inp=document.getElementById('spCmtInp');
+  const text=inp?inp.value.trim():'';
+  if(!t||!text)return;
+  if(!t.comments)t.comments=[];
+  const now=new Date();
+  const ts=`${now.getDate()}/${String(now.getMonth()+1).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  t.comments.push({author:'TF',text,ts});
+  openPanel(id);
+}
+
+buildFilters();renderView();
+</script>
+</body>
+</html>
