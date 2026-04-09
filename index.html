@@ -476,7 +476,13 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
   <div style="background:var(--bg);border-radius:var(--r);padding:24px;width:460px;max-width:94vw;max-height:82vh;display:flex;flex-direction:column;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0">
       <div style="font-size:15px;font-weight:700;color:var(--tx)">Board snapshots</div>
-      <button onclick="closeBoardsModal()" style="width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:20px;color:var(--tx2);display:flex;align-items:center;justify-content:center">✕</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button onclick="fetchSnapshotsFromGithub()" title="Fetch snapshots from GitHub" style="display:flex;align-items:center;gap:5px;padding:0 10px;height:28px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:12px;cursor:pointer">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+          Fetch
+        </button>
+        <button onclick="closeBoardsModal()" style="width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:20px;color:var(--tx2);display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
     </div>
     <div style="margin-bottom:16px;flex-shrink:0">
       <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Save current board as</div>
@@ -1154,6 +1160,9 @@ function renderBoardsList(){
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button onclick="loadSnapshot(${s.id})" style="padding:0 12px;height:28px;border:none;border-radius:6px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;cursor:pointer">Load</button>
+        <button onclick="saveSnapshotToGithub(${s.id})" title="Push to GitHub" style="padding:0 8px;height:28px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:var(--tx2);font-size:12px;cursor:pointer;display:flex;align-items:center">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        </button>
         <button onclick="deleteSnapshot(${s.id})" style="padding:0 12px;height:28px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:#e2445c;font-size:12px;cursor:pointer">Delete</button>
       </div>
     </div>`;
@@ -1162,6 +1171,63 @@ function renderBoardsList(){
 
 function openBoardsModal(){renderBoardsList();document.getElementById('boardsModal').style.display='flex';}
 function closeBoardsModal(){document.getElementById('boardsModal').style.display='none';}
+
+async function saveSnapshotToGithub(id){
+  const s=getGhSettings();
+  if(!s.token){openGhModal();return;}
+  const snap=getSnapshots().find(x=>x.id===id);
+  if(!snap)return;
+  const filePath='snapshots/'+id+'.json';
+  const hdrs={'Authorization':'token '+s.token,'Accept':'application/vnd.github.v3+json'};
+  setSaveStatus('Pushing snapshot…','var(--tx3)');
+  try{
+    let sha;
+    const getRes=await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${filePath}`,{headers:hdrs});
+    if(getRes.ok){const meta=await getRes.json();sha=meta.sha;}
+    else if(getRes.status!==404)throw new Error('GET '+getRes.status);
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(snap,null,2))));
+    const body={message:`Snapshot: ${snap.name}`,content,...(sha?{sha}:{})};
+    const putRes=await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${filePath}`,{
+      method:'PUT',headers:{...hdrs,'Content-Type':'application/json'},body:JSON.stringify(body)
+    });
+    if(!putRes.ok)throw new Error('PUT '+putRes.status);
+    setSaveStatus('Snapshot pushed ✓','#00c875');
+    setTimeout(()=>setSaveStatus('',''),4000);
+  }catch(err){setSaveStatus('Error: '+err.message,'#e2445c');}
+}
+
+async function fetchSnapshotsFromGithub(){
+  const s=getGhSettings();
+  if(!s.token){openGhModal();return;}
+  const hdrs={'Authorization':'token '+s.token,'Accept':'application/vnd.github.v3+json'};
+  setSaveStatus('Fetching snapshots…','var(--tx3)');
+  try{
+    const dirRes=await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/snapshots`,{headers:hdrs});
+    if(dirRes.status===404){setSaveStatus('No snapshots folder on GitHub','var(--tx3)');setTimeout(()=>setSaveStatus('',''),3000);return;}
+    if(!dirRes.ok)throw new Error('GET '+dirRes.status);
+    const files=await dirRes.json();
+    const jsonFiles=files.filter(f=>f.name.endsWith('.json'));
+    const existing=getSnapshots();
+    const existingIds=new Set(existing.map(x=>String(x.id)));
+    let added=0;
+    for(const f of jsonFiles){
+      const fRes=await fetch(f.download_url);
+      if(!fRes.ok)continue;
+      try{
+        const snap=await fRes.json();
+        if(snap.id&&snap.TASKS&&snap.STREAMS&&!existingIds.has(String(snap.id))){
+          existing.push(snap);
+          existingIds.add(String(snap.id));
+          added++;
+        }
+      }catch{}
+    }
+    localStorage.setItem(SNAP_KEY,JSON.stringify(existing));
+    renderBoardsList();
+    setSaveStatus(added?`${added} snapshot${added>1?'s':''} imported ✓`:'All snapshots already local','#00c875');
+    setTimeout(()=>setSaveStatus('',''),4000);
+  }catch(err){setSaveStatus('Error: '+err.message,'#e2445c');}
+}
 
 // ── RESET ──
 function openResetModal(){document.getElementById('resetModal').style.display='flex';}
