@@ -1,6 +1,6 @@
 # Friday.com
 
-**v1.2** · `100426 001500`
+**v1.3** · `100426 002000`
 
 A Monday.com-style project board that runs entirely as a single HTML file — no framework, no build step, no server required.
 
