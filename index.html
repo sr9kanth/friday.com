@@ -294,7 +294,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
         <th style="width:110px">End date</th>
         <th style="width:80px">Effort</th>
         <th style="width:100px">Timeframe</th>
-        <th style="min-width:200px">Timeline</th>
+        <th id="tlHeader" style="min-width:200px;padding:0;vertical-align:bottom"></th>
       </tr>
     </thead>
     <tbody id="boardBody"><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(123, 94, 167);"><div class="grp-label">
@@ -736,6 +736,23 @@ function renderMain(){
   const totalDays=Math.ceil((MAX_D-MIN_D)/86400000);
   const tlW=totalDays*PPD;
   const todayPx=px(TODAY.toISOString().slice(0,10));
+
+  // Build month header strip for the Timeline column
+  (function(){
+    const hdr=document.getElementById('tlHeader');if(!hdr)return;
+    let html=`<div style="position:relative;width:${tlW}px;display:flex;border-bottom:1px solid var(--bd);overflow:hidden">`;
+    let d=new Date(MIN_D.getFullYear(),MIN_D.getMonth(),1);
+    while(d<=MAX_D){
+      const mEnd=new Date(d.getFullYear(),d.getMonth()+1,0);
+      const s=Math.max(0,Math.ceil((d-MIN_D)/86400000));
+      const e=Math.min(totalDays,Math.ceil((mEnd-MIN_D)/86400000)+1);
+      const w=(e-s)*PPD;
+      html+=`<div style="width:${w}px;flex-shrink:0;text-align:center;font-size:10px;font-weight:600;color:var(--tx2);border-right:1px solid var(--bd);padding:3px 0;white-space:nowrap;overflow:hidden">${d.toLocaleString('default',{month:'short'})}</div>`;
+      d=new Date(d.getFullYear(),d.getMonth()+1,1);
+    }
+    html+=`</div>`;
+    hdr.innerHTML=html;
+  })();
 
   Object.entries(groups).forEach(([stream,items])=>{
     const col=STREAMS[stream]||'#676879';
