@@ -3394,6 +3394,20 @@
                             </svg>
                             Push update
                         </button>
+                        <button onclick="pullSharedBoard()" id="sharePullBtn" style="
+                                display: none;
+                                padding: 0 12px;
+                                height: 34px;
+                                border: 1px solid var(--bd2);
+                                border-radius: var(--r);
+                                background: transparent;
+                                color: var(--tx2);
+                                font-size: 13px;
+                                cursor: pointer;
+                            ">
+                            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13" style="vertical-align:middle;margin-right:4px"><path d="M8 5v7M5 9l3 3 3-3"></path><path d="M3 3h10"></path></svg>
+                            Pull latest
+                        </button>
                         <button onclick="stopSharing()" id="shareStopBtn" style="
                                 display: none;
                                 padding: 0 12px;
@@ -5993,6 +6007,9 @@
                 document.getElementById("sharePushBtn").style.display = hasCode
                     ? ""
                     : "none";
+                document.getElementById("sharePullBtn").style.display = hasCode
+                    ? ""
+                    : "none";
                 document.getElementById("shareStopBtn").style.display = hasCode
                     ? ""
                     : "none";
@@ -6046,6 +6063,7 @@
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareCode", shareCode);
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    startSharePolling();
                     renderShareModal();
                     setShareStatus(
                         "Board shared! Send the code above to your collaborators.",
@@ -6083,11 +6101,41 @@
                 }
             }
 
+            async function pullSharedBoard() {
+                if (!shareCode) return;
+                const sb = getSb();
+                if (!sb) { setShareStatus("Supabase not configured.", "#e2445c"); return; }
+                setShareStatus("Pulling latest…");
+                try {
+                    const { data, error } = await sb.from("boards").select("data").eq("code", shareCode).single();
+                    if (error || !data) { setShareStatus("Could not fetch board — code may no longer exist.", "#e2445c"); return; }
+                    loadBoardSnapshot(data.data);
+                    shareUpdatedAt = new Date().toLocaleString();
+                    localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    if (document.getElementById("shareModal").style.display !== "none") renderShareModal();
+                    setShareStatus("Board refreshed from shared code.", "#00c875");
+                } catch(e) {
+                    setShareStatus("Error: " + e.message, "#e2445c");
+                }
+            }
+
+            // Poll for updates every 60s while a share code is active
+            let _sharePollTimer = null;
+            function startSharePolling() {
+                stopSharePolling();
+                _sharePollTimer = setInterval(() => { if (shareCode && getSb()) pullSharedBoard(); }, 60000);
+            }
+            function stopSharePolling() {
+                if (_sharePollTimer) { clearInterval(_sharePollTimer); _sharePollTimer = null; }
+            }
+            if (shareCode && getSb()) startSharePolling();
+
             function stopSharing() {
                 shareCode = null;
                 shareUpdatedAt = null;
                 localStorage.removeItem("fridayShareCode");
                 localStorage.removeItem("fridayShareUpdatedAt");
+                stopSharePolling();
                 renderShareModal();
                 setShareStatus(
                     "Sharing stopped locally. The remote code still exists on Supabase.",
@@ -6131,6 +6179,7 @@
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareCode", shareCode);
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
+                    startSharePolling();
                     closeShareModal();
                 } catch(e) {
                     setJoinStatus("Error: " + e.message, "#e2445c");
