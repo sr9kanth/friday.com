@@ -207,7 +207,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 .comment-send:hover{filter:brightness(1.08)}
 .sp-divider{height:1px;background:var(--bd);margin:0 0 20px}
 </style>
-<link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"><link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"><link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"></head>
+<link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"><link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"><link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"><link rel="stylesheet" href="chrome-extension://ijpjifeopinhiiofbbblkfgcdcfcmncd/recording.39684163.css"></head>
 <body class="force-dark">
 
 <div class="topbar">
@@ -250,7 +250,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
   <button class="tb-btn" onclick="openGhModal()" title="GitHub settings" style="padding:0 7px">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="2.5"></circle><path d="M8 2.5v-1M8 14.5v-1M2.5 8h-1M14.5 8h-1M4.1 4.1l-.7-.7M12.6 12.6l-.7-.7M4.1 11.9l-.7.7M12.6 3.4l-.7.7M5.5 8a2.5 2.5 0 105 0 2.5 2.5 0 00-5 0z"></path></svg>
   </button>
-  <span id="saveStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3);">Saving…</span>
+  <span id="saveStatus" style="font-size:11px;color:var(--tx3);white-space:nowrap">Saving…</span>
   <div class="spacer"></div>
   <button class="tb-btn">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"></circle><path d="M11 11l2.5 2.5"></path></svg>
@@ -275,7 +275,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M4 8h8M6 12h4"></path></svg>
       Filter
     </button>
-    <select class="flt" id="streamFil" onchange="renderView()"><option value="all">All groups</option><option value="LRS R3">LRS R3</option><option value="MFR">MFR</option><option value="LRS R4">LRS R4</option><option value="OOS">OOS</option></select>
+    <select class="flt" id="streamFil" onchange="renderView()"><option value="all">All groups</option><option value="LRS R3">LRS R3</option><option value="MFR">MFR</option><option value="LRS R4">LRS R4</option></select>
     <select class="flt" id="statusFil" onchange="renderView()"><option value="all">All statuses</option><option value="Done">Done</option><option value="In progress">In progress</option><option value="">No status</option></select>
     <select class="flt" id="leadFil" onchange="renderView()"><option value="all">All owners</option><option value="SM">SM</option></select>
   </div>
@@ -329,14 +329,8 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
         <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"></path></svg>
       </button>
       <span class="grp-name" contenteditable="true" spellcheck="false" style="color:#00c875">MFR</span>
-      <span class="grp-count">1 item</span>
-    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"><div style="flex: 1 1 0%; background: var(--bg3); border-radius: 0px 4px 4px 0px;"></div></div></td></tr><tr class="task-row" data-id="4" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#00c875"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(4,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="4" onblur="updateField(4,'nm',this.textContent.trim())">Scoping</span>
-        </div>
-      </div></td><td><div class="av-wrap"></div></td><td><button class="chip c-none" onclick="openStatusPopup(event,4)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,4)">—</button></td><td><span class="date-cell">—</span></td><td><span class="date-cell">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(4,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(4,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><span class="tl-empty">No dates set</span></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('MFR')">
+      <span class="grp-count">0 items</span>
+    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"></div></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('MFR')">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
       Add task
     </button></td></tr><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(87, 155, 252);"><div class="grp-label">
@@ -344,41 +338,8 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
         <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"></path></svg>
       </button>
       <span class="grp-name" contenteditable="true" spellcheck="false" style="color:#579bfc">LRS R4</span>
-      <span class="grp-count">2 items</span>
-    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"><div style="flex: 2 1 0%; background: var(--bg3); border-radius: 0px 4px 4px 0px;"></div></div></td></tr><tr class="task-row" data-id="5" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#579bfc"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(5,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="5" onblur="updateField(5,'nm',this.textContent.trim())">Digital Tech Ref</span>
-        </div>
-      </div></td><td><div class="av-wrap"></div></td><td><button class="chip c-none" onclick="openStatusPopup(event,5)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,5)">—</button></td><td><span class="date-cell">—</span></td><td><span class="date-cell">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(5,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(5,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><span class="tl-empty">No dates set</span></td></tr><tr class="task-row" data-id="6" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#579bfc"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(6,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="6" onblur="updateField(6,'nm',this.textContent.trim())">Embedded RFI</span>
-        </div>
-      </div></td><td><div class="av-wrap"></div></td><td><button class="chip c-none" onclick="openStatusPopup(event,6)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,6)">—</button></td><td><span class="date-cell">—</span></td><td><span class="date-cell">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(6,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(6,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><span class="tl-empty">No dates set</span></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('LRS R4')">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
-      Add task
-    </button></td></tr><tr class="ghead"><td class="name-td" colspan="1" style="border-left: 4px solid rgb(253, 171, 61);"><div class="grp-label">
-      <button class="grp-toggle open" onclick="toggleGroup('OOS')">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 2l4 3-4 3z"></path></svg>
-      </button>
-      <span class="grp-name" contenteditable="true" spellcheck="false" style="color:#fdab3d">Future<br></span>
-      <span class="grp-count">2 items</span>
-    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"><div style="flex: 2 1 0%; background: var(--bg3); border-radius: 0px 4px 4px 0px;"></div></div></td></tr><tr class="task-row" data-id="7" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#fdab3d"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(7,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="7" onblur="updateField(7,'nm',this.textContent.trim())">Mutual Recognition</span>
-        </div>
-      </div></td><td><div class="av-wrap"></div></td><td><button class="chip c-none" onclick="openStatusPopup(event,7)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,7)">—</button></td><td><span class="date-cell">—</span></td><td><span class="date-cell">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(7,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(7,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><span class="tl-empty">No dates set</span></td></tr><tr class="task-row" data-id="8" draggable="true"><td class="name-td"><div class="name-inner">
-        <div class="row-stripe" style="background:#fdab3d"></div>
-        <div class="row-check"><input type="checkbox" onchange="toggleDone(8,this)"></div>
-        <div class="row-name">
-          <span class="rn-text" contenteditable="true" spellcheck="false" data-id="8" onblur="updateField(8,'nm',this.textContent.trim())">Building Designer</span>
-        </div>
-      </div></td><td><div class="av-wrap"></div></td><td><button class="chip c-none" onclick="openStatusPopup(event,8)">—</button></td><td><button class="pri-chip p-none" onclick="openPriPopup(event,8)">—</button></td><td><span class="date-cell">—</span></td><td><span class="date-cell">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(8,'ef',this.textContent.trim())">—</span></td><td><span class="rn-text" contenteditable="true" spellcheck="false" style="font-size:12px;color:var(--tx2)" onblur="updateField(8,'tf',this.textContent.trim())">—</span></td><td class="tl-cell"><span class="tl-empty">No dates set</span></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('OOS')">
+      <span class="grp-count">0 items</span>
+    </div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tl-cell" style="padding: 0px 12px;"><div style="display: flex; gap: 2px; height: 6px; border-radius: 4px; overflow: hidden; width: 100px;"></div></td></tr><tr class="add-row"><td class="name-td" colspan="9" style="padding-left: 0px;"><button class="add-task-btn" onclick="addTask('LRS R4')">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="6" y1="1" x2="6" y2="11"></line><line x1="1" y1="6" x2="11" y2="6"></line></svg>
       Add task
     </button></td></tr><tr class="add-group"><td colspan="9"><button class="add-group-btn" onclick="openAddGroup()">
@@ -438,7 +399,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 </div>
 
 <!-- GitHub settings modal -->
-<div id="ghModal" style="display: none; position: fixed; inset: 0px; z-index: 600; background: rgba(0, 0, 0, 0.45); align-items: center; justify-content: center;">
+<div id="ghModal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.45);align-items:center;justify-content:center">
   <div style="background:var(--bg);border-radius:var(--r);padding:24px;width:380px;max-width:92vw;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
     <div style="font-size:15px;font-weight:700;color:var(--tx);margin-bottom:4px">GitHub sync settings</div>
     <div style="font-size:12px;color:var(--tx3);margin-bottom:18px">Saves TASKS, STREAMS &amp; comments back to your repo</div>
@@ -472,7 +433,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 </div>
 
 <!-- Boards modal -->
-<div id="boardsModal" style="display: none; position: fixed; inset: 0px; z-index: 600; background: rgba(0, 0, 0, 0.45); align-items: center; justify-content: center;">
+<div id="boardsModal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.45);align-items:center;justify-content:center">
   <div style="background:var(--bg);border-radius:var(--r);padding:24px;width:460px;max-width:94vw;max-height:82vh;display:flex;flex-direction:column;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0">
       <div style="font-size:15px;font-weight:700;color:var(--tx)">Board snapshots</div>
@@ -486,16 +447,7 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
       </div>
     </div>
     <div style="height:1px;background:var(--bd);margin-bottom:14px;flex-shrink:0"></div>
-    <div id="boardsList" style="overflow-y:auto;flex:1"><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;gap:12px">
-      <div style="min-width:0">
-        <div style="font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Calvin</div>
-        <div style="font-size:11px;color:var(--tx3);margin-top:2px">68 tasks · 16 groups · 9/4/26 21:38</div>
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button onclick="loadSnapshot(1775734708903)" style="padding:0 12px;height:28px;border:none;border-radius:6px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;cursor:pointer">Load</button>
-        <button onclick="deleteSnapshot(1775734708903)" style="padding:0 12px;height:28px;border:1px solid var(--bd2);border-radius:6px;background:transparent;color:#e2445c;font-size:12px;cursor:pointer">Delete</button>
-      </div>
-    </div></div>
+    <div id="boardsList" style="overflow-y:auto;flex:1"></div>
   </div>
 </div>
 
@@ -519,8 +471,8 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 <!-- Inline input modal (replaces prompt()) -->
 <div id="inputModal" style="display: none; position: fixed; inset: 0px; z-index: 600; background: rgba(0, 0, 0, 0.45); align-items: center; justify-content: center;">
   <div style="background:var(--bg);border-radius:var(--r);padding:22px;width:360px;max-width:92vw;border:1px solid var(--bd2);box-shadow:0 8px 32px rgba(0,0,0,.2)">
-    <div id="inputModalTitle" style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px">Add task to "OOS"</div>
-    <input id="inputModalInp" type="text" style="width:100%;border:1px solid var(--bd2);border-radius:6px;padding:8px 10px;font-size:14px;background:var(--bg);color:var(--tx);outline:none;margin-bottom:12px" onkeydown="if(event.key==='Enter')confirmInputModal();if(event.key==='Escape')closeInputModal()" placeholder="Task name…">
+    <div id="inputModalTitle" style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px">New group</div>
+    <input id="inputModalInp" type="text" style="width:100%;border:1px solid var(--bd2);border-radius:6px;padding:8px 10px;font-size:14px;background:var(--bg);color:var(--tx);outline:none;margin-bottom:12px" onkeydown="if(event.key==='Enter')confirmInputModal();if(event.key==='Escape')closeInputModal()" placeholder="Group name…">
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button onclick="closeInputModal()" style="padding:0 14px;height:32px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);font-size:13px;cursor:pointer">Cancel</button>
       <button onclick="confirmInputModal()" style="padding:0 16px;height:32px;border:none;border-radius:var(--r);background:var(--acc);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Add</button>
@@ -594,11 +546,11 @@ tr.sum-row td.name-td{position:sticky;left:0;background:var(--bg2);z-index:19}
 <div class="popup" id="popup" style="display: none; left: 1175px; top: 188px;"><div class="popup-item" onclick="setPri(1,'High')"><div class="popup-dot" style="background:#e2445c"></div>High</div><div class="popup-item" onclick="setPri(1,'Medium')"><div class="popup-dot" style="background:#fdab3d"></div>Medium</div><div class="popup-item" onclick="setPri(1,'Low')"><div class="popup-dot" style="background:#00c875"></div>Low</div><div class="popup-item" onclick="setPri(1,'')"><div class="popup-dot" style="background:#c3c6d4"></div>—</div></div>
 
 <script>
-const STREAMS={"LRS R3":"#7b5ea7","MFR":"#00c875","LRS R4":"#579bfc","OOS":"#fdab3d"};
+const STREAMS={"LRS R3":"#7b5ea7","MFR":"#00c875","LRS R4":"#579bfc"};
 const AV_COLORS={"AL":"#a25ddc","JM":"#00c875","SR":"#fdab3d","TF":"#579bfc","MS":"#e2445c","PM":"#ff642e","CC":"#676879","SM":"#6c6cff"};
 const PRIORITIES={'':'p-none','Low':'p-lo','Medium':'p-med','High':'p-hi'};
-let TASKS=[{"id":1,"st":"LRS R3","nm":"Refusal DocGen Letters","ld":["SM"],"ef":"","tf":"","s":"2026-04-06","e":"2026-04-15","status":"In progress","pri":"Medium","comments":[{"author":"TF","text":"Aiming to release for R2","ts":"9/04 22:30"}]},{"id":2,"st":"LRS R3","nm":"Applicant tracking​","ld":["SM"],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":3,"st":"LRS R3","nm":"LRS/Janison​ Integration","ld":["SM"],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":4,"st":"MFR","nm":"Scoping","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":5,"st":"LRS R4","nm":"Digital Tech Ref","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":6,"st":"LRS R4","nm":"Embedded RFI","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":7,"st":"OOS","nm":"Mutual Recognition","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":8,"st":"OOS","nm":"Building Designer","ld":[],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]}];
-let nextId=9, currentView='main', collapsed={};
+let TASKS=[{"id":1,"st":"LRS R3","nm":"Refusal DocGen Letters","ld":["SM"],"ef":"","tf":"","s":"2026-04-06","e":"2026-04-15","status":"In progress","pri":"Medium","comments":[{"author":"TF","text":"Aiming to release for R2","ts":"9/04 22:30"}]},{"id":2,"st":"LRS R3","nm":"Applicant tracking​","ld":["SM"],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]},{"id":3,"st":"LRS R3","nm":"LRS/Janison​ Integration","ld":["SM"],"ef":"","tf":"","s":"","e":"","status":"","pri":"","comments":[]}];
+let nextId=4, currentView='main', collapsed={};
 
 // ── LIVE STATE (localStorage overrides baked-in data on load) ──
 const LIVE_KEY='fridayBoardState';
@@ -1393,4 +1345,4 @@ buildFilters();renderView();
 </script>
 
 
-<plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.37783462112409071775736152470"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.72518089277379131775737001381"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui></body><dubble-extension id="__dubble0394030940.99506582531271651775737613615"></dubble-extension></html>
+<plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.37783462112409071775736152470"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.72518089277379131775737001381"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.99506582531271651775737613615"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui></body><dubble-extension id="__dubble0394030940.43656394689935231775738039254"></dubble-extension></html>
