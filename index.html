@@ -3789,8 +3789,8 @@
             }
 
             let shareCode = localStorage.getItem("fridayShareCode") || null;
-            let shareUpdatedAt =
-                localStorage.getItem("fridayShareUpdatedAt") || null;
+            let shareUpdatedAt = localStorage.getItem("fridayShareUpdatedAt") || null;
+            let shareRemoteUpdatedAt = localStorage.getItem("fridayShareRemoteUpdatedAt") || null;
 
             const STREAMS = {
                 Planning: "#7b5ea7",
@@ -6049,20 +6049,19 @@
                 try {
                     const code = randCode();
                     const data = boardSnapshot();
+                    const insertedAt = new Date().toISOString();
                     const { error } = await sb
                         .from("boards")
-                        .insert({
-                            code,
-                            data,
-                            updated_at: new Date().toISOString(),
-                        });
+                        .insert({ code, data, updated_at: insertedAt });
                     if (error) {
                         setShareStatus("Error: " + error.message, "#e2445c");
                         return;
                     }
                     shareCode = code;
+                    shareRemoteUpdatedAt = insertedAt;
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareCode", shareCode);
+                    localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt);
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
                     startSharePolling();
                     renderShareModal();
@@ -6093,6 +6092,8 @@
                         setShareStatus("Error: " + error.message, "#e2445c");
                         return;
                     }
+                    shareRemoteUpdatedAt = ts;
+                    localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt);
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
                     renderShareModal();
@@ -6108,9 +6109,15 @@
                 if (!sb) { if (!silent) setShareStatus("Supabase not configured.", "#e2445c"); return; }
                 if (!silent) setShareStatus("Pulling latest…");
                 try {
-                    const { data, error } = await sb.from("boards").select("data").eq("code", shareCode).single();
-                    if (error || !data) { if (!silent) setShareStatus("Could not fetch board — code may no longer exist.", "#e2445c"); return; }
-                    loadBoardSnapshot(data.data);
+                    // Fetch timestamp first — only load full data if remote is newer
+                    const { data: meta, error: metaErr } = await sb.from("boards").select("updated_at, data").eq("code", shareCode).single();
+                    if (metaErr || !meta) { if (!silent) setShareStatus("Could not fetch board — code may no longer exist.", "#e2445c"); return; }
+                    if (silent && shareRemoteUpdatedAt && meta.updated_at <= shareRemoteUpdatedAt) {
+                        return; // Remote hasn't changed — don't overwrite local edits
+                    }
+                    loadBoardSnapshot(meta.data);
+                    shareRemoteUpdatedAt = meta.updated_at;
+                    localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt);
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
                     if (document.getElementById("shareModal").style.display !== "none") renderShareModal();
@@ -6147,8 +6154,10 @@
             function stopSharing() {
                 shareCode = null;
                 shareUpdatedAt = null;
+                shareRemoteUpdatedAt = null;
                 localStorage.removeItem("fridayShareCode");
                 localStorage.removeItem("fridayShareUpdatedAt");
+                localStorage.removeItem("fridayShareRemoteUpdatedAt");
                 stopSharePolling();
                 renderShareModal();
                 setShareStatus(
@@ -6178,7 +6187,7 @@
                 try {
                     const { data, error } = await sb
                         .from("boards")
-                        .select("data")
+                        .select("data, updated_at")
                         .eq("code", code)
                         .single();
                     if (error || !data) {
@@ -6190,8 +6199,10 @@
                     }
                     loadBoardSnapshot(data.data);
                     shareCode = code;
+                    shareRemoteUpdatedAt = data.updated_at || null;
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareCode", shareCode);
+                    localStorage.setItem("fridayShareRemoteUpdatedAt", shareRemoteUpdatedAt || '');
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
                     startSharePolling();
                     closeShareModal();
