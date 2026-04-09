@@ -131,7 +131,7 @@ tr.add-group td{height:36px;background:var(--bg);padding:8px 12px}
 
 /* Owner avatars */
 .av-wrap{display:flex;gap:3px;flex-wrap:wrap}
-.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;color:#fff;border:2px solid var(--bg)}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;cursor:pointer;flex-shrink:0;color:#fff;border:2px solid var(--bg)}
 .av:hover{transform:scale(1.12)}
 
 /* Date cells */
@@ -626,9 +626,9 @@ const LIVE_KEY='fridayBoardState';
     Object.keys(STREAMS).forEach(k=>delete STREAMS[k]);
     Object.assign(STREAMS,d.STREAMS||{});
     nextId=d.nextId||1;
-    // Restore custom owners
-    (d.KNOWN_OWNERS||[]).forEach(o=>{if(!KNOWN_OWNERS.includes(o))KNOWN_OWNERS.push(o);});
-    Object.assign(AV_COLORS,d.AV_COLORS||{});
+    // Restore owners — replace, not merge, so owners stay board-specific
+    if(d.KNOWN_OWNERS){KNOWN_OWNERS.length=0;KNOWN_OWNERS.push(...d.KNOWN_OWNERS);}
+    if(d.AV_COLORS){Object.keys(AV_COLORS).forEach(k=>delete AV_COLORS[k]);Object.assign(AV_COLORS,d.AV_COLORS);}
   }catch(e){}
 })();
 function saveLiveState(){
@@ -776,7 +776,7 @@ function renderMain(){
       // Owner
       const oc=document.createElement('td');
       const avw=document.createElement('div');avw.className='av-wrap';
-      t.ld.slice(0,3).forEach(l=>{const a=document.createElement('div');a.className='av';a.style.background=AV_COLORS[l]||'#676879';a.title=l;a.textContent=l.slice(0,2);avw.appendChild(a);});
+      t.ld.slice(0,3).forEach(l=>{const a=document.createElement('div');a.className='av';a.style.background=AV_COLORS[l]||'#676879';a.title=l;a.textContent=l;avw.appendChild(a);});
       oc.appendChild(avw);row.appendChild(oc);
 
       // Status
@@ -903,7 +903,7 @@ function renderGantt(){
 
     items.forEach(t=>{
       leftRows+=`<div style="height:${RH}px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;padding:0 8px 0 16px" title="${t.nm}">
-        <div class="av" style="width:22px;height:22px;font-size:8px;background:${AV_COLORS[t.ld[0]]||'#676879'};flex-shrink:0">${(t.ld[0]||'?').slice(0,2)}</div>
+        <div class="av" style="width:22px;height:22px;font-size:8px;background:${AV_COLORS[t.ld[0]]||'#676879'};flex-shrink:0">${t.ld[0]||'?'}</div>
         <span style="font-size:12px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${t.nm}</span>
         <button class="chip ${t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':'c-none'}" style="font-size:10px;height:18px;padding:0 7px;flex-shrink:0">${t.status||'—'}</button>
       </div>`;
@@ -1112,7 +1112,9 @@ function saveCurrentBoard(forceName){
   const snaps=getSnapshots();
   snaps.unshift({id:Date.now(),name,savedAt:new Date().toISOString(),nextId,
     STREAMS:JSON.parse(JSON.stringify(STREAMS)),
-    TASKS:JSON.parse(JSON.stringify(TASKS))});
+    TASKS:JSON.parse(JSON.stringify(TASKS)),
+    KNOWN_OWNERS:[...KNOWN_OWNERS],
+    AV_COLORS:{...AV_COLORS}});
   localStorage.setItem(SNAP_KEY,JSON.stringify(snaps));
   if(nameEl&&!forceName)nameEl.value='';
   renderBoardsList();
@@ -1126,6 +1128,8 @@ function loadSnapshot(id){
   Object.keys(STREAMS).forEach(k=>delete STREAMS[k]);
   Object.assign(STREAMS,snap.STREAMS);
   nextId=snap.nextId||TASKS.length+1;
+  if(snap.KNOWN_OWNERS){KNOWN_OWNERS.length=0;KNOWN_OWNERS.push(...snap.KNOWN_OWNERS);}
+  if(snap.AV_COLORS){Object.keys(AV_COLORS).forEach(k=>delete AV_COLORS[k]);Object.assign(AV_COLORS,snap.AV_COLORS);}
   collapsed={};
   saveLiveState();
   closePanel();
@@ -1140,7 +1144,9 @@ function updateSnapshot(id){
   if(idx===-1)return;
   snaps[idx]={...snaps[idx],savedAt:new Date().toISOString(),nextId,
     STREAMS:JSON.parse(JSON.stringify(STREAMS)),
-    TASKS:JSON.parse(JSON.stringify(TASKS))};
+    TASKS:JSON.parse(JSON.stringify(TASKS)),
+    KNOWN_OWNERS:[...KNOWN_OWNERS],
+    AV_COLORS:{...AV_COLORS}};
   localStorage.setItem(SNAP_KEY,JSON.stringify(snaps));
   renderBoardsList();
 }
@@ -1352,12 +1358,12 @@ function openPanel(id){
 function buildPanelBody(t,col){
   const sCls=t.status==='Done'?'c-done':t.status==='In progress'?'c-prog':t.status==='Stuck'?'c-stuck':'c-none';
   const pCls=PRIORITIES[t.pri||'']||'p-none';
-  const ownHtml=t.ld.map(l=>`<div class="av" style="background:${AV_COLORS[l]||'#676879'}" title="Click to remove ${escH(l)}" onclick="panelRemoveOwner(${t.id},'${l}')">${escH(l.slice(0,2))}</div>`).join('')
+  const ownHtml=t.ld.map(l=>`<div class="av" style="background:${AV_COLORS[l]||'#676879'}" title="Click to remove ${escH(l)}" onclick="panelRemoveOwner(${t.id},'${l}')">${escH(l)}</div>`).join('')
     +`<button class="sp-av-add" onclick="panelAddOwner(${t.id})" title="Add owner">+</button>`;
   const cmtHtml=(t.comments||[]).length===0
     ?`<p style="font-size:12px;color:var(--tx3);margin-top:4px">No comments yet</p>`
     :(t.comments||[]).map(c=>`<div class="comment-item">
-      <div class="av" style="background:${AV_COLORS[c.author]||'#676879'};width:28px;height:28px;font-size:9px;flex-shrink:0">${escH(c.author.slice(0,2))}</div>
+      <div class="av" style="background:${AV_COLORS[c.author]||'#676879'};width:28px;height:28px;font-size:8px;flex-shrink:0">${escH(c.author)}</div>
       <div class="comment-body">
         <div class="comment-meta">${escH(c.author)} &middot; ${escH(c.ts)}</div>
         <div class="comment-text">${escH(c.text)}</div>
@@ -1438,7 +1444,7 @@ function panelAddOwner(id){
   const t=TASKS.find(x=>x.id===id);if(!t)return;
   const avail=KNOWN_OWNERS.filter(o=>!t.ld.includes(o));
   const html=avail.map(o=>`<div class="popup-item" onclick="panelPickOwner(${id},'${o}')">
-    <div class="av" style="background:${AV_COLORS[o]||'#676879'};width:22px;height:22px;font-size:9px">${o.slice(0,2)}</div>${escH(o)}
+    <div class="av" style="background:${AV_COLORS[o]||'#676879'};width:22px;height:22px;font-size:8px">${escH(o)}</div>${escH(o)}
   </div>`).join('')+`<div class="popup-item" onclick="panelAddNewOwner(${id})" style="border-top:1px solid var(--bd2);margin-top:4px;padding-top:6px;color:var(--acc)">+ New person…</div>`;
   const fakeEvt={clientX:Math.round(window.innerWidth*0.62),clientY:220};
   openPopup(fakeEvt,html);
