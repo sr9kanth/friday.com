@@ -1054,6 +1054,7 @@
                 </svg>
             </button>
             <span id="saveStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3)">Saving…</span>
+            <span id="syncStatus" style="font-size: 11px; white-space: nowrap; color: var(--tx3); display: none"></span>
             <div class="spacer"></div>
             <button class="tb-btn">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -6101,32 +6102,45 @@
                 }
             }
 
-            async function pullSharedBoard() {
+            async function pullSharedBoard(silent) {
                 if (!shareCode) return;
                 const sb = getSb();
-                if (!sb) { setShareStatus("Supabase not configured.", "#e2445c"); return; }
-                setShareStatus("Pulling latest…");
+                if (!sb) { if (!silent) setShareStatus("Supabase not configured.", "#e2445c"); return; }
+                if (!silent) setShareStatus("Pulling latest…");
                 try {
                     const { data, error } = await sb.from("boards").select("data").eq("code", shareCode).single();
-                    if (error || !data) { setShareStatus("Could not fetch board — code may no longer exist.", "#e2445c"); return; }
+                    if (error || !data) { if (!silent) setShareStatus("Could not fetch board — code may no longer exist.", "#e2445c"); return; }
                     loadBoardSnapshot(data.data);
                     shareUpdatedAt = new Date().toLocaleString();
                     localStorage.setItem("fridayShareUpdatedAt", shareUpdatedAt);
                     if (document.getElementById("shareModal").style.display !== "none") renderShareModal();
-                    setShareStatus("Board refreshed from shared code.", "#00c875");
+                    if (!silent) setShareStatus("Board refreshed from shared code.", "#00c875");
                 } catch(e) {
-                    setShareStatus("Error: " + e.message, "#e2445c");
+                    if (!silent) setShareStatus("Error: " + e.message, "#e2445c");
                 }
             }
 
             // Poll for updates every 60s while a share code is active
             let _sharePollTimer = null;
+            function setSyncStatus(msg, color) {
+                const el = document.getElementById('syncStatus');
+                if (!el) return;
+                if (msg) { el.textContent = msg; el.style.color = color || 'var(--tx3)'; el.style.display = ''; }
+                else { el.style.display = 'none'; }
+            }
             function startSharePolling() {
                 stopSharePolling();
-                _sharePollTimer = setInterval(() => { if (shareCode && getSb()) pullSharedBoard(); }, 60000);
+                setSyncStatus('⟳ Live sync on', 'var(--acc)');
+                _sharePollTimer = setInterval(async () => {
+                    if (!shareCode || !getSb()) return;
+                    setSyncStatus('⟳ Syncing…', 'var(--tx3)');
+                    await pullSharedBoard(true);
+                    setSyncStatus('⟳ Live sync on', 'var(--acc)');
+                }, 15000);
             }
             function stopSharePolling() {
                 if (_sharePollTimer) { clearInterval(_sharePollTimer); _sharePollTimer = null; }
+                setSyncStatus(null);
             }
             if (shareCode && getSb()) startSharePolling();
 
