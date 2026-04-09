@@ -525,6 +525,7 @@ function filteredTasks(){
 function renderMain(){
   const tasks=filteredTasks();
   const groups={};
+  Object.keys(STREAMS).forEach(s=>{groups[s]=[];});
   tasks.forEach(t=>{if(!groups[t.st])groups[t.st]=[];groups[t.st].push(t);});
   const tbody=document.getElementById('boardBody');tbody.innerHTML='';
   const totalDays=Math.ceil((MAX_D-MIN_D)/86400000);
