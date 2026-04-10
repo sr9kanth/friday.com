@@ -3530,6 +3530,7 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById('appVersion');
                 if (el) el.textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
+                logVisit();
             });
 
             // ── SUPABASE CONFIG ──
@@ -3555,6 +3556,19 @@
                         SUPABASE_ANON_KEY,
                     );
                 return _sb;
+            }
+
+            async function logVisit() {
+                const sb = getSb();
+                if (!sb) return;
+                try {
+                    await sb.from('page_visits').insert({
+                        user_agent: navigator.userAgent,
+                        url: location.href,
+                        referrer: document.referrer || null,
+                        share_code: shareCode || null,
+                    });
+                } catch (e) {}
             }
 
             let shareCode = localStorage.getItem("fridayShareCode") || null;
@@ -5744,12 +5758,12 @@
         </div>
 
         <!-- Version stamp (bottom-right) -->
-        <div id="footerBar" style="position:fixed;bottom:0;left:0;right:0;height:22px;background:var(--bg);border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:10;pointer-events:none;user-select:none">
+        <div id="footerBar" style="position:fixed;bottom:0;left:0;right:0;height:28px;background:var(--bg);border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:10;pointer-events:none;user-select:none">
             <div style="display:flex;align-items:center;gap:10px">
-                <span id="syncStatus" style="font-size:10px;color:var(--acc);display:none"></span>
-                <span id="syncLastUpdated" style="font-size:10px;color:var(--tx3);display:none"></span>
+                <span id="syncStatus" style="font-size:12px;color:var(--acc);display:none"></span>
+                <span id="syncLastUpdated" style="font-size:12px;color:var(--tx3);display:none"></span>
             </div>
-            <span id="appVersion" style="font-size:10px;color:var(--tx3)"></span>
+            <span id="appVersion" style="font-size:12px;color:var(--tx3)"></span>
         </div>
 
         <plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.37783462112409071775736152470"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.72518089277379131775737001381"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.99506582531271651775737613615"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui><dubble-extension id="__dubble0394030940.43656394689935231775738039254"></dubble-extension><plasmo-csui id="magic-how-recording"></plasmo-csui>

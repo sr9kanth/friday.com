@@ -22,6 +22,7 @@ A Monday.com-style project board that runs entirely as a single HTML file — no
 - **Export HTML** — export current board as a standalone `.html` with all data baked in
 - **Share board** — Supabase-backed sharing with a 6-char code; collaborators join via the Join tab
 - **Live sync** — auto-pushes changes 3s after every edit; auto-pulls every 15s; footer shows `⟳ Live sync on` and last synced timestamp
+- **Visitor logging** — every page load is logged to Supabase (`page_visits` table) with timestamp, URL, referrer, and active share code
 - **Smart empty states** — contextual messages when board is empty, all tasks are done, or tasks are overdue
 - **First-run tour** — 7-step spotlight walkthrough shown on first visit
 - **Save to GitHub** — publishes the app shell (with default demo data) to GitHub Pages; personal board data stays in localStorage only
@@ -51,11 +52,12 @@ Once a share code is active:
 
 Changes from one window appear in all others within ~15s automatically.
 
-## Supabase Setup (required for Share)
+## Supabase Setup (required for Share + Visitor Logging)
 
 1. Create a free project at [supabase.com](https://supabase.com)
 2. In the SQL editor, run:
 ```sql
+-- Board sharing / live sync
 create table boards (
   code text primary key,
   data jsonb not null,
@@ -65,6 +67,18 @@ alter table boards enable row level security;
 create policy "public read"   on boards for select using (true);
 create policy "public insert" on boards for insert with check (true);
 create policy "public update" on boards for update using (true);
+
+-- Visitor logging
+create table page_visits (
+  id bigint generated always as identity primary key,
+  visited_at timestamptz default now(),
+  user_agent text,
+  url text,
+  referrer text,
+  share_code text
+);
+alter table page_visits enable row level security;
+create policy "public insert" on page_visits for insert with check (true);
 ```
 3. In `index.html`, replace the two constants near the top of the `<script>` tag:
 ```js
@@ -99,18 +113,10 @@ python3 -m http.server 8080
 # open http://localhost:8080
 ```
 
-## GitHub Save
+## Deployment
 
-Click **Save** in the topbar to push the app to GitHub Pages. Prompts for username, repo, file path, and a personal access token (repo scope). Settings stored in localStorage.
-
-## Known conflict: in-app Save vs git push
-
-The Save button pushes via the GitHub Contents API. If you have unpushed local commits this causes a rebase conflict:
 ```bash
-git checkout --theirs index.html
-git add index.html
-GIT_EDITOR=true git rebase --continue
-git push
+git add index.html && git commit -m "..." && git push
 ```
 
 ## Deployed

@@ -2,7 +2,7 @@
 
 ## Project overview
 
-**Current version:** `v1.5.3` · `100426 095007` (DDMMYY HHMMSS) — shown in footer.
+**Current version:** `v1.5.3` · `100426 095007` (DDMMYY HHMMSS) — shown in footer (12px text, 28px bar height).
 
 Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything lives in `index.html` — no framework, no build step, no dependencies.
 
@@ -62,9 +62,8 @@ Single-file vanilla HTML/CSS/JS project board (Monday.com-style). Everything liv
 1. Add to `saveLiveState()` serialization object
 2. Add to the IIFE at the top of the script that reads from localStorage (use replace, not merge)
 3. Add to `buildExportHtml()` regex replacements so Export HTML bakes it in
-4. Add to `buildPublicHtml()` with default values so GitHub Save doesn't expose personal data
-5. Add to `saveCurrentBoard()` and `updateSnapshot()` so snapshots carry it
-6. Add to `loadSnapshot()` so loading restores it
+4. Add to `saveCurrentBoard()` and `updateSnapshot()` so snapshots carry it
+5. Add to `loadSnapshot()` so loading restores it
 
 ### Rendering
 - `renderView()` → `renderMain()` or `renderGantt()`
@@ -113,16 +112,8 @@ create policy "public insert" on boards for insert with check (true);
 create policy "public update" on boards for update using (true);
 ```
 
-### GitHub Save vs Export HTML
-- **`buildExportHtml()`** — bakes current TASKS/STREAMS/owners/statuses into the HTML (used by Export HTML button)
-- **`buildPublicHtml()`** — bakes DEFAULT Product Launch data into the HTML (used by Save to GitHub button)
-- Neither replaces `SUPABASE_URL` / `SUPABASE_ANON_KEY` — credentials are preserved in both exports
-- This separation means the public GitHub Pages URL never exposes personal board data
-
-### GitHub Snapshots
-- `saveSnapshotToGithub(id)` — pushes `snapshots/{id}.json` to the repo
-- `fetchSnapshotsFromGithub()` — lists `snapshots/` dir, imports any not already in localStorage (by id)
-- Snapshots include: TASKS, STREAMS, KNOWN_OWNERS, AV_COLORS, STATUS_COLORS
+### Export HTML
+- **`buildExportHtml()`** — bakes current TASKS/STREAMS/owners/statuses into the HTML; `SUPABASE_URL` / `SUPABASE_ANON_KEY` are preserved
 
 ### Reset
 - Clears `localStorage.removeItem('fridayBoardState')` then `location.reload()`
@@ -138,21 +129,29 @@ create policy "public update" on boards for update using (true);
 17 tasks across 5 groups: Planning (3), Design (4), Development (5), Testing (3), Launch (2).
 Owners: AL (`#a25ddc`), JM (`#00c875`), SR (`#fdab3d`). nextId starts at 18.
 
+### Visitor logging (Supabase)
+- `logVisit()` — called from `DOMContentLoaded`; inserts a row into `page_visits` with `user_agent`, `url`, `referrer`, `share_code`
+- Silently no-ops if Supabase is not configured (`getSb()` returns null)
+
+**Supabase `page_visits` table schema:**
+```sql
+create table page_visits (
+  id bigint generated always as identity primary key,
+  visited_at timestamptz default now(),
+  user_agent text,
+  url text,
+  referrer text,
+  share_code text
+);
+alter table page_visits enable row level security;
+create policy "public insert" on page_visits for insert with check (true);
+```
+
 ## Deployment
 
-GitHub Pages via the in-app Save button, or manually:
+Deploy manually via git:
 ```bash
 git add index.html && git commit -m "..." && git push
 ```
 
 Deployed at: `https://sr9kanth.github.io/friday.com/`
-
-## Known conflicts: in-app Save vs git push
-
-The Save button pushes `buildPublicHtml()` directly to GitHub via the Contents API. If you have unpushed local commits, this causes a rebase conflict. Resolution:
-```bash
-git checkout --theirs index.html
-git add index.html
-GIT_EDITOR=true git rebase --continue
-git push
-```
